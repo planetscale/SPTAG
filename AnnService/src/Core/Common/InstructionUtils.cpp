@@ -64,6 +64,7 @@ namespace SPTAG {
 #endif
 #endif
             }
+#if 0
             if (HW_AVX512)
                 SPTAGLIB_LOG(Helper::LogLevel::LL_Info, "Using AVX512 InstructionSet!\n");
             else if (HW_AVX2)
@@ -76,6 +77,7 @@ namespace SPTAG {
                 SPTAGLIB_LOG(Helper::LogLevel::LL_Info, "Using SSE InstructionSet!\n");
             else
                 SPTAGLIB_LOG(Helper::LogLevel::LL_Info, "Using NONE InstructionSet!\n");
+#endif
         }
     }
 }
