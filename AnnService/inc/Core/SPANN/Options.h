@@ -178,6 +178,8 @@ namespace SPTAG {
             bool m_stressTest;
             int m_bufferLength;
 
+            // Iterative
+            int m_headBatch;
 
             Options() {
 #define DefineBasicParameter(VarName, VarType, DefaultValue, RepresentStr) \

@@ -63,7 +63,7 @@ if (TBB_FOUND)
 endif()
 
 add_library (SPTAGLib SHARED ${SRC_FILES} ${HDR_FILES})
-target_link_libraries (SPTAGLib DistanceUtils ${RocksDB_LIBRARIES} ${uring_LIBRARIES} libzstd_shared ${NUMA_LIBRARY} tbb ${SPDK_LIBRARIES})
+target_link_libraries (SPTAGLib DistanceUtils ${RocksDB_LIBRARIES} ${uring_LIBRARIES} zstd ${NUMA_LIBRARY} tbb ${SPDK_LIBRARIES})
 add_library (SPTAGLibStatic STATIC ${SRC_FILES} ${HDR_FILES})
 target_link_libraries (SPTAGLibStatic DistanceUtils ${RocksDB_LIBRARIES} ${uring_LIBRARIES} libzstd_static ${NUMA_LIBRARY_STATIC} tbb ${SPDK_LIBRARIES})
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
@@ -108,37 +108,37 @@ if (NOT LIBRARYONLY)
       RUNTIME DESTINATION bin
       ARCHIVE DESTINATION lib
       LIBRARY DESTINATION lib)
+
+    file(GLOB_RECURSE SSD_SERVING_HDR_FILES ${AnnService}/inc/SSDServing/*.h)
+    file(GLOB_RECURSE SSD_SERVING_FILES ${AnnService}/src/SSDServing/*.cpp)
+
+    file(GLOB_RECURSE SPFRESH_HDR_FILES ${AnnService}/inc/SPFresh/*.h)
+    file(GLOB_RECURSE SPFRESH_FILES ${AnnService}/src/SPFresh/*.cpp)
+
+    add_executable(ssdserving ${SSD_SERVING_HDR_FILES} ${SSD_SERVING_FILES})
+    add_executable(spfresh ${SPFRESH_HDR_FILES} ${SPFRESH_FILES})
+    target_link_libraries(ssdserving SPTAGLibStatic ${Boost_LIBRARIES} ${RocksDB_LIBRARIES})
+    target_link_libraries(spfresh SPTAGLibStatic ${Boost_LIBRARIES} ${RocksDB_LIBRARIES})
+    target_compile_definitions(ssdserving PRIVATE _exe)
+    target_compile_definitions(spfresh PRIVATE _exe)
+
+    # for Test
+    add_library(ssdservingLib ${SSD_SERVING_HDR_FILES} ${SSD_SERVING_FILES})
+    target_link_libraries(ssdservingLib SPTAGLibStatic ${Boost_LIBRARIES})
+
+    find_package(MPI)
+    if (MPI_FOUND)
+        message (STATUS "Found MPI.")
+        message (STATUS "MPI Include Path: ${MPI_CXX_INCLUDE_PATH}")
+        message (STATUS "MPI Libraries: ${MPI_CXX_LIBRARIES}")
+        include_directories (${MPI_CXX_INCLUDE_PATH})
+        file(GLOB PARTITION_FILES ${AnnService}/src/BalancedDataPartition/*.cpp)
+        add_executable(balanceddatapartition ${PARTITION_FILES})
+        target_link_libraries(balanceddatapartition SPTAGLibStatic ${Boost_LIBRARIES} ${MPI_CXX_LIBRARIES})
+    endif()
+
+    install(TARGETS ssdservingLib ssdserving
+    RUNTIME DESTINATION bin
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib)
 endif()
-
-file(GLOB_RECURSE SSD_SERVING_HDR_FILES ${AnnService}/inc/SSDServing/*.h)
-file(GLOB_RECURSE SSD_SERVING_FILES ${AnnService}/src/SSDServing/*.cpp)
-
-file(GLOB_RECURSE SPFRESH_HDR_FILES ${AnnService}/inc/SPFresh/*.h)
-file(GLOB_RECURSE SPFRESH_FILES ${AnnService}/src/SPFresh/*.cpp)
-
-add_executable(ssdserving ${SSD_SERVING_HDR_FILES} ${SSD_SERVING_FILES})
-add_executable(spfresh ${SPFRESH_HDR_FILES} ${SPFRESH_FILES})
-target_link_libraries(ssdserving SPTAGLibStatic ${Boost_LIBRARIES} ${RocksDB_LIBRARIES})
-target_link_libraries(spfresh SPTAGLibStatic ${Boost_LIBRARIES} ${RocksDB_LIBRARIES})
-target_compile_definitions(ssdserving PRIVATE _exe)
-target_compile_definitions(spfresh PRIVATE _exe)
-
-# for Test
-add_library(ssdservingLib ${SSD_SERVING_HDR_FILES} ${SSD_SERVING_FILES})
-target_link_libraries(ssdservingLib SPTAGLibStatic ${Boost_LIBRARIES})
-
-find_package(MPI)
-if (MPI_FOUND)
-    message (STATUS "Found MPI.")
-    message (STATUS "MPI Include Path: ${MPI_CXX_INCLUDE_PATH}")
-    message (STATUS "MPI Libraries: ${MPI_CXX_LIBRARIES}")
-    include_directories (${MPI_CXX_INCLUDE_PATH})
-    file(GLOB PARTITION_FILES ${AnnService}/src/BalancedDataPartition/*.cpp)
-    add_executable(balanceddatapartition ${PARTITION_FILES})
-    target_link_libraries(balanceddatapartition SPTAGLibStatic ${Boost_LIBRARIES} ${MPI_CXX_LIBRARIES})
-endif()
-
-install(TARGETS ssdservingLib ssdserving
-  RUNTIME DESTINATION bin
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib)

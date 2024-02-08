@@ -103,7 +103,15 @@ else()
     message (FATAL_ERROR "Could no find openmp!")
 endif()
 
-find_package(Boost 1.66 COMPONENTS system thread serialization wserialization regex filesystem)
+option(GPU "GPU" ON)
+option(LIBRARYONLY "LIBRARYONLY" ON)
+
+if (LIBRARYONLY)
+    find_package(Boost 1.66)
+else()
+    find_package(Boost 1.66 COMPONENTS system thread serialization wserialization regex filesystem)
+endif()
+
 if (Boost_FOUND)
     include_directories (${Boost_INCLUDE_DIR})
     link_directories (${Boost_LIBRARY_DIR})
@@ -123,9 +131,12 @@ if (ROCKSDB)
     add_definitions(-DROCKSDB)
 endif()
 
-add_subdirectory (ThirdParty/zstd/build/cmake)
+# add_subdirectory (ThirdParty/zstd/build/cmake)
 
 add_subdirectory (AnnService)
 add_subdirectory (Test)
 add_subdirectory (GPUSupport)
-add_subdirectory (Wrappers)
+
+if (NOT LIBRARYONLY)
+    add_subdirectory (Wrappers)
+endif()
