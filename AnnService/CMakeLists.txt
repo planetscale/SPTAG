@@ -33,8 +33,10 @@ add_library (DistanceUtils STATIC
     src/Core/Common/InstructionUtils.cpp
     )
 
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "amd64|x86_64")
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
     target_compile_options(DistanceUtils PRIVATE -mavx2 -mavx -msse -msse2 -mavx512f -mavx512bw -mavx512dq -fPIC)
+endif()
 endif()
 
 add_library (SPTAGLib SHARED ${SRC_FILES} ${HDR_FILES})
