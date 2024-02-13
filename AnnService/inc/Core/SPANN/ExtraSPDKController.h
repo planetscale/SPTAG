@@ -3,6 +3,7 @@
 
 #ifndef _SPTAG_SPANN_EXTRASPDKCONTROLLER_H_
 #define _SPTAG_SPANN_EXTRASPDKCONTROLLER_H_
+#ifdef WITH_SPDK
 
 #include "inc/Helper/KeyValueIO.h"
 #include "inc/Core/Common/Dataset.h"
@@ -480,4 +481,5 @@ namespace SPTAG::SPANN
         std::mutex m_updateMutex;
     };
 }
+#endif // WITH_SPDK
 #endif // _SPTAG_SPANN_EXTRASPDKCONTROLLER_H_
