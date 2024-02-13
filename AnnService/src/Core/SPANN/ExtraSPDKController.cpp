@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+#ifdef WITH_SPDK
 #include "inc/Core/SPANN/ExtraSPDKController.h"
 
 namespace SPTAG::SPANN
@@ -476,3 +477,5 @@ bool SPDKIO::BlockController::ShutDown() {
 }
 
 }
+
+#endif // WITH_SPDK

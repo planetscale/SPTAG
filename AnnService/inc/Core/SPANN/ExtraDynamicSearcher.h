@@ -6,6 +6,8 @@
 
 #include "inc/Helper/VectorSetReader.h"
 #include "inc/Helper/AsyncFileReader.h"
+#include "inc/Core/VectorIndex.h"
+#include "inc/Helper/ThreadPool.h"
 #include "IExtraSearcher.h"
 #include "ExtraStaticSearcher.h"
 #include "inc/Core/Common/TruthSet.h"
@@ -13,6 +15,7 @@
 #include "inc/Core/Common/FineGrainedLock.h"
 #include "PersistentBuffer.h"
 #include "inc/Core/Common/PostingSizeRecord.h"
+#include "inc/Core/Common/BKTree.h"
 #include "ExtraSPDKController.h"
 #include <chrono>
 #include <cstdint>
@@ -165,8 +168,10 @@ namespace SPTAG::SPANN {
     public:
         ExtraDynamicSearcher(const char* dbPath, int dim, int postingBlockLimit, bool useDirectIO, float searchLatencyHardLimit, int mergeThreshold, bool useSPDK = false, int batchSize = 64, int bufferLength = 3, bool recovery = false) {
             if (useSPDK) {
+#ifdef WITH_SPDK
                 db.reset(new SPDKIO(dbPath, 1024 * 1024, MaxSize, postingBlockLimit + bufferLength, 1024, batchSize, recovery));
                 m_postingSizeLimit = postingBlockLimit * PageSize / (sizeof(ValueType) * dim + sizeof(int) + sizeof(uint8_t));
+#endif
             } else {
 #ifdef ROCKSDB
                 db.reset(new RocksDBIO(dbPath, useDirectIO, false, recovery));
@@ -1764,6 +1769,16 @@ namespace SPTAG::SPANN {
                 i++;
             }
             return ErrorCode::Success;
+        }
+
+        bool SearchIterativeNext(ExtraWorkSpace* p_exWorkSpace, QueryResult& p_queryResults, std::shared_ptr<VectorIndex> p_index) override {
+            return false;
+        }
+
+        void SearchIndexWithoutParsing(ExtraWorkSpace* p_exWorkSpace) override {}
+
+        bool SearchNextInPosting(ExtraWorkSpace* p_exWorkSpace, QueryResult& p_queryResults, std::shared_ptr<VectorIndex>& p_index) override {
+            return false;
         }
 
     private:

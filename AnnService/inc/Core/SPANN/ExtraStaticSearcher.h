@@ -8,6 +8,7 @@
 #include "inc/Helper/AsyncFileReader.h"
 #include "IExtraSearcher.h"
 #include "inc/Core/Common/TruthSet.h"
+#include "inc/Core/Common/SIMDUtils.h"
 #include "Compressor.h"
 
 #include <map>
