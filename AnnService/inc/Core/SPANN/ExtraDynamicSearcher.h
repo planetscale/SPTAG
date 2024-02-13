@@ -13,6 +13,7 @@
 #include "inc/Core/Common/FineGrainedLock.h"
 #include "PersistentBuffer.h"
 #include "inc/Core/Common/PostingSizeRecord.h"
+#include "inc/Core/Common/BKTree.h"
 #include "ExtraSPDKController.h"
 #include <chrono>
 #include <cstdint>
@@ -1764,6 +1765,16 @@ namespace SPTAG::SPANN {
                 i++;
             }
             return ErrorCode::Success;
+        }
+
+        bool SearchIterativeNext(ExtraWorkSpace* p_exWorkSpace, QueryResult& p_queryResults, std::shared_ptr<VectorIndex> p_index) override {
+            return false;
+        }
+
+        void SearchIndexWithoutParsing(ExtraWorkSpace* p_exWorkSpace) override {}
+
+        bool SearchNextInPosting(ExtraWorkSpace* p_exWorkSpace, QueryResult& p_queryResults, std::shared_ptr<VectorIndex>& p_index) override {
+            return false;
         }
 
     private:
