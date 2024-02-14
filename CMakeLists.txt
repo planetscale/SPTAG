@@ -128,7 +128,10 @@ option(LIBRARYONLY "LIBRARYONLY" OFF)
 option(ROCKSDB "ROCKSDB" ON)
 
 if (ROCKSDB)
+    set(FAIL_ON_WARNINGS OFF)
+    add_subdirectory(ThirdParty/RocksDB)
     add_definitions(-DROCKSDB)
+    include_directories(ThirdParty/RocksDB/include)
 endif()
 
 # add_subdirectory (ThirdParty/zstd/build/cmake)
