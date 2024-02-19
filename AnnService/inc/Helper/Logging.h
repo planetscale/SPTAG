@@ -104,7 +104,7 @@ namespace SPTAG
                 if (m_handle != nullptr) m_handle->close();
             }
 
-            virtual void Logging(const char* title, LogLevel level, const char* file, int line, const char* func, const char* format, ...)
+            virtual void Logging(const char* title, LogLevel level, const char* file, int line, const char* func, const char* format, ...) override
             {
                 if (level < m_level || m_handle == nullptr || !m_handle->is_open()) return;
 

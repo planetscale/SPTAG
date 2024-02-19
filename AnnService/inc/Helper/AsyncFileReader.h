@@ -521,7 +521,7 @@ namespace SPTAG
                 std::uint64_t maxIOSize = (1 << 20),
                 std::uint32_t maxReadRetries = 2,
                 std::uint32_t maxWriteRetries = 2,
-                std::uint16_t threadPoolSize = 4)
+                std::uint16_t threadPoolSize = 4) override
             {
                 m_fileHandle = open(filePath, O_RDONLY | O_DIRECT);
                 if (m_fileHandle <= 0) {
@@ -549,29 +549,29 @@ namespace SPTAG
                 return true;
             }
 
-            virtual std::uint64_t ReadBinary(std::uint64_t readSize, char* buffer, std::uint64_t offset = UINT64_MAX)
+            virtual std::uint64_t ReadBinary(std::uint64_t readSize, char* buffer, std::uint64_t offset = UINT64_MAX) override
             {
                 return pread(m_fileHandle, (void*)buffer, readSize, offset);
             }
 
-            virtual std::uint64_t WriteBinary(std::uint64_t writeSize, const char* buffer, std::uint64_t offset = UINT64_MAX)
+            virtual std::uint64_t WriteBinary(std::uint64_t writeSize, const char* buffer, std::uint64_t offset = UINT64_MAX) override
             {
                 return 0;
             }
 
-            virtual std::uint64_t ReadString(std::uint64_t& readSize, std::unique_ptr<char[]>& buffer, char delim = '\n', std::uint64_t offset = UINT64_MAX)
+            virtual std::uint64_t ReadString(std::uint64_t& readSize, std::unique_ptr<char[]>& buffer, char delim = '\n', std::uint64_t offset = UINT64_MAX) override
             {
                 return 0;
             }
 
-            virtual std::uint64_t WriteString(const char* buffer, std::uint64_t offset = UINT64_MAX)
+            virtual std::uint64_t WriteString(const char* buffer, std::uint64_t offset = UINT64_MAX) override
             {
                 return 0;
             }
 
-            virtual bool ReadFileAsync(AsyncReadRequest& readRequest)
+            virtual bool ReadFileAsync(AsyncReadRequest& readRequest) override
             {
-                struct iocb myiocb = { 0 };
+                struct iocb myiocb = {};
                 myiocb.aio_data = reinterpret_cast<uintptr_t>(&readRequest);
                 myiocb.aio_lio_opcode = IOCB_CMD_PREAD;
                 myiocb.aio_fildes = m_fileHandle;
@@ -589,11 +589,11 @@ namespace SPTAG
                 return true;
             }
 
-            virtual std::uint64_t TellP() { return 0; }
+            virtual std::uint64_t TellP() override { return 0; }
 
-            virtual void ShutDown()
+            virtual void ShutDown() override
             {
-                for (int i = 0; i < m_iocps.size(); i++) syscall(__NR_io_destroy, m_iocps[i]);
+                for (std::size_t i = 0; i < m_iocps.size(); i++) syscall(__NR_io_destroy, m_iocps[i]);
                 close(m_fileHandle);
 #ifndef BATCH_READ
                 m_shutdown = true;

@@ -354,7 +354,7 @@ case VectorValueType::Name: \
                 workSpace->Initialize(max(m_iMaxCheck, m_pGraph.m_iMaxCheckForRefineGraph), m_iHashTableExp);
             }
             workSpace->ResetResult(m_iMaxCheck, batch);
-            return std::move(workSpace);
+            return workSpace;
         }
 
         template<typename T>

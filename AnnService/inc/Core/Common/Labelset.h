@@ -50,6 +50,8 @@ namespace SPTAG
                             return true;
                         case InvalidIDBehavior::AlwaysNotContains:
                             return false;
+                        case InvalidIDBehavior::Passthrough:
+                            break; // no-op
                     }
                 }
 
@@ -66,6 +68,8 @@ namespace SPTAG
                             return true;
                         case InvalidIDBehavior::AlwaysNotContains:
                             return false;
+                        case InvalidIDBehavior::Passthrough:
+                            break; // no-op
                     }
                 }
 

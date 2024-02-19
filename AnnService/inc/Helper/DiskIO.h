@@ -88,20 +88,20 @@ namespace SPTAG
                 std::uint64_t maxIOSize = (1 << 20),
                 std::uint32_t maxReadRetries = 2,
                 std::uint32_t maxWriteRetries = 2,
-                std::uint16_t threadPoolSize = 4)
+                std::uint16_t threadPoolSize = 4) override
             {
                 m_handle.reset(new std::fstream(filePath, (std::ios::openmode)openMode));
                 return m_handle->is_open();
             }
 
-            virtual std::uint64_t ReadBinary(std::uint64_t readSize, char* buffer, std::uint64_t offset = UINT64_MAX)
+            virtual std::uint64_t ReadBinary(std::uint64_t readSize, char* buffer, std::uint64_t offset = UINT64_MAX) override
             {
                 if (offset != UINT64_MAX) m_handle->seekg(offset, std::ios::beg);
                 m_handle->read((char*)buffer, readSize);
                 return m_handle->gcount();
             }
 
-            virtual std::uint64_t WriteBinary(std::uint64_t writeSize, const char* buffer, std::uint64_t offset = UINT64_MAX)
+            virtual std::uint64_t WriteBinary(std::uint64_t writeSize, const char* buffer, std::uint64_t offset = UINT64_MAX) override
             {
                 if (offset != UINT64_MAX) m_handle->seekp(offset, std::ios::beg);
                 m_handle->write((const char*)buffer, writeSize);
@@ -109,7 +109,7 @@ namespace SPTAG
                 return writeSize;
             }
 
-            virtual std::uint64_t ReadString(std::uint64_t& readSize, std::unique_ptr<char[]>& buffer, char delim = '\n', std::uint64_t offset = UINT64_MAX)
+            virtual std::uint64_t ReadString(std::uint64_t& readSize, std::unique_ptr<char[]>& buffer, char delim = '\n', std::uint64_t offset = UINT64_MAX) override
             {
                 if (offset != UINT64_MAX) m_handle->seekg(offset, std::ios::beg);
                 std::uint64_t readCount = 0;
@@ -142,17 +142,17 @@ namespace SPTAG
                 return readCount;
             }
 
-            virtual std::uint64_t WriteString(const char* buffer, std::uint64_t offset = UINT64_MAX)
+            virtual std::uint64_t WriteString(const char* buffer, std::uint64_t offset = UINT64_MAX) override
             {
                 return WriteBinary(strlen(buffer), (const char*)buffer, offset);
             }
 
-            virtual std::uint64_t TellP()
+            virtual std::uint64_t TellP() override
             {
                 return m_handle->tellp();
             }
 
-            virtual void ShutDown()
+            virtual void ShutDown() override
             {
                 if (m_handle != nullptr) m_handle->close();
             }
@@ -193,7 +193,7 @@ namespace SPTAG
                 std::uint64_t maxIOSize = (1 << 20),
                 std::uint32_t maxReadRetries = 2,
                 std::uint32_t maxWriteRetries = 2,
-                std::uint16_t threadPoolSize = 4)
+                std::uint16_t threadPoolSize = 4) override
             {
                 if (filePath != nullptr)
                     m_handle.reset(new streambuf((char*)filePath, maxIOSize));
@@ -202,20 +202,20 @@ namespace SPTAG
                 return true;
             }
 
-            virtual std::uint64_t ReadBinary(std::uint64_t readSize, char* buffer, std::uint64_t offset = UINT64_MAX)
+            virtual std::uint64_t ReadBinary(std::uint64_t readSize, char* buffer, std::uint64_t offset = UINT64_MAX) override
             {
                 if (offset != UINT64_MAX) m_handle->pubseekpos(offset);
                 return m_handle->sgetn((char*)buffer, readSize);
             }
 
-            virtual std::uint64_t WriteBinary(std::uint64_t writeSize, const char* buffer, std::uint64_t offset = UINT64_MAX)
+            virtual std::uint64_t WriteBinary(std::uint64_t writeSize, const char* buffer, std::uint64_t offset = UINT64_MAX) override
             {
                 if (offset != UINT64_MAX) m_handle->pubseekpos(offset);
                 if ((std::uint64_t)m_handle->sputn((const char*)buffer, writeSize) < writeSize) return 0;
                 return writeSize;
             }
 
-            virtual std::uint64_t ReadString(std::uint64_t& readSize, std::unique_ptr<char[]>& buffer, char delim = '\n', std::uint64_t offset = UINT64_MAX)
+            virtual std::uint64_t ReadString(std::uint64_t& readSize, std::unique_ptr<char[]>& buffer, char delim = '\n', std::uint64_t offset = UINT64_MAX) override
             {
                 if (offset != UINT64_MAX) m_handle->pubseekpos(offset);
                 std::uint64_t readCount = 0;
@@ -249,17 +249,17 @@ namespace SPTAG
                 return readCount;
             }
 
-            virtual std::uint64_t WriteString(const char* buffer, std::uint64_t offset = UINT64_MAX)
+            virtual std::uint64_t WriteString(const char* buffer, std::uint64_t offset = UINT64_MAX) override
             {
                 return WriteBinary(strlen(buffer), (const char*)buffer, offset);
             }
 
-            virtual std::uint64_t TellP()
+            virtual std::uint64_t TellP() override
             { 
                 return m_handle->tellp(); 
             }
 
-            virtual void ShutDown() {}
+            virtual void ShutDown() override {}
 
         private:
             std::unique_ptr<streambuf> m_handle;

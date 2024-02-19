@@ -74,7 +74,7 @@ namespace SPTAG {
     void listdir(std::string path, std::vector<std::string>& files) {
         if (auto dirptr = opendir(path.substr(0, path.length() - 1).c_str())) {
             while (auto f = readdir(dirptr)) {
-                if (!f->d_name || f->d_name[0] == '.') continue;
+                if (!f->d_name[0] || f->d_name[0] == '.') continue;
                 std::string tmp = path.substr(0, path.length() - 1);
                 tmp += std::string(f->d_name);
                 if (f->d_type == DT_DIR) {
@@ -171,7 +171,7 @@ std::shared_ptr<std::vector<std::uint64_t>> VectorIndex::CalculateBufferSize() c
     {
         ret->push_back(m_pQuantizer->BufferSize());
     }
-    return std::move(ret);
+    return ret;
 }
 
 

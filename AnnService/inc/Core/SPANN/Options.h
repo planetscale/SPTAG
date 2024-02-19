@@ -227,7 +227,7 @@ class Options {
 #include "inc/Core/SPANN/ParameterDefinitionList.h"
 #undef DefineBasicParameter
 
-      ;
+      {};
     } else if (Helper::StrUtils::StrEqualIgnoreCase(p_section, "SelectHead")) {
 #define DefineSelectHeadParameter(VarName, VarType, DefaultValue,         \
                                   RepresentStr)                           \
@@ -243,7 +243,7 @@ class Options {
 #include "inc/Core/SPANN/ParameterDefinitionList.h"
 #undef DefineSelectHeadParameter
 
-      ;
+      {};
     } else if (Helper::StrUtils::StrEqualIgnoreCase(p_section, "BuildHead")) {
 #define DefineBuildHeadParameter(VarName, VarType, DefaultValue, RepresentStr) \
   if (Helper::StrUtils::StrEqualIgnoreCase(p_param, RepresentStr)) {           \
@@ -258,7 +258,7 @@ class Options {
 #include "inc/Core/SPANN/ParameterDefinitionList.h"
 #undef DefineBuildHeadParameter
 
-      ;
+      {};
     } else if (Helper::StrUtils::StrEqualIgnoreCase(p_section,
                                                     "BuildSSDIndex")) {
 #define DefineSSDParameter(VarName, VarType, DefaultValue, RepresentStr)  \
@@ -274,7 +274,7 @@ class Options {
 #include "inc/Core/SPANN/ParameterDefinitionList.h"
 #undef DefineSSDParameter
 
-      ;
+      {};
     }
     return ErrorCode::Success;
   }
@@ -291,7 +291,7 @@ class Options {
 #include "inc/Core/SPANN/ParameterDefinitionList.h"
 #undef DefineBasicParameter
 
-      ;
+      {};
     } else if (Helper::StrUtils::StrEqualIgnoreCase(p_section, "SelectHead")) {
 #define DefineSelectHeadParameter(VarName, VarType, DefaultValue,    \
                                   RepresentStr)                      \
@@ -302,7 +302,7 @@ class Options {
 #include "inc/Core/SPANN/ParameterDefinitionList.h"
 #undef DefineSelectHeadParameter
 
-      ;
+      {};
     } else if (Helper::StrUtils::StrEqualIgnoreCase(p_section, "BuildHead")) {
 #define DefineBuildHeadParameter(VarName, VarType, DefaultValue, RepresentStr) \
   if (Helper::StrUtils::StrEqualIgnoreCase(p_param, RepresentStr)) {           \
@@ -312,7 +312,7 @@ class Options {
 #include "inc/Core/SPANN/ParameterDefinitionList.h"
 #undef DefineBuildHeadParameter
 
-      ;
+      {};
     } else if (Helper::StrUtils::StrEqualIgnoreCase(p_section,
                                                     "BuildSSDIndex")) {
 #define DefineSSDParameter(VarName, VarType, DefaultValue, RepresentStr) \
@@ -323,7 +323,7 @@ class Options {
 #include "inc/Core/SPANN/ParameterDefinitionList.h"
 #undef DefineSSDParameter
 
-      ;
+      {};
     }
     return std::string();
   }

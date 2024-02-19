@@ -48,25 +48,25 @@ public:
 
     virtual ~BasicVectorSet();
 
-    virtual VectorValueType GetValueType() const;
+    virtual VectorValueType GetValueType() const override;
 
-    virtual void* GetVector(SizeType p_vectorID) const;
+    virtual void* GetVector(SizeType p_vectorID) const override;
 
-    virtual void* GetData() const;
+    virtual void* GetData() const override;
 
-    virtual DimensionType Dimension() const;
+    virtual DimensionType Dimension() const override;
 
-    virtual SizeType Count() const;
+    virtual SizeType Count() const override;
 
-    virtual bool Available() const;
+    virtual bool Available() const override;
 
-    virtual ErrorCode Save(const std::string& p_vectorFile) const;
+    virtual ErrorCode Save(const std::string& p_vectorFile) const override;
 
-    virtual ErrorCode AppendSave(const std::string& p_vectorFile) const;
+    virtual ErrorCode AppendSave(const std::string& p_vectorFile) const override;
 
-    virtual SizeType PerVectorDataSize() const;
+    virtual SizeType PerVectorDataSize() const override;
 
-    virtual void Normalize(int p_threads);
+    virtual void Normalize(int p_threads) override;
 
 private:
     ByteArray m_data;

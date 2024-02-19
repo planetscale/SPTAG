@@ -18,6 +18,7 @@ namespace SPTAG
         class IWorkSpaceFactory
         {
         public:
+            virtual ~IWorkSpaceFactory() {}
             virtual std::unique_ptr<WorkSpaceType> GetWorkSpace() = 0;
             virtual void ReturnWorkSpace(std::unique_ptr<WorkSpaceType> ws) = 0;
         };
@@ -224,7 +225,10 @@ namespace SPTAG
             }
         };
 
-        class IWorkSpace {};
+        class IWorkSpace {
+        public:
+            virtual ~IWorkSpace() {}
+        };
 
         // Variables for each single NN search
         struct WorkSpace : public IWorkSpace

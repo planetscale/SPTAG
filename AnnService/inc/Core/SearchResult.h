@@ -39,12 +39,12 @@ namespace SPTAG
         inline bool operator()(const Edge& a, int b) const
         {
             return a.node < b;
-        };
+        }
 
         inline bool operator()(int a, const Edge& b) const
         {
             return a < b.node;
-        };
+        }
 
         inline bool operator()(const Edge& a, const Edge& b) const
         {
@@ -59,7 +59,7 @@ namespace SPTAG
             }
 
             return a.node < b.node;
-        };
+        }
     };
 
     struct BasicResult

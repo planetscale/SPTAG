@@ -155,7 +155,7 @@ namespace SPTAG
                 buffersize->push_back(m_pTrees.BufferSize());
                 buffersize->push_back(m_pGraph.BufferSize());
                 buffersize->push_back(m_deletedID.BufferSize());
-                return std::move(buffersize);
+                return buffersize;
             }
 
             std::shared_ptr<std::vector<std::string>> GetIndexFiles() const
@@ -165,7 +165,7 @@ namespace SPTAG
                 files->push_back(m_sBKTFilename);
                 files->push_back(m_sGraphFilename);
                 files->push_back(m_sDeleteDataPointsFilename);
-                return std::move(files);
+                return files;
             }
 
             ErrorCode SaveConfig(std::shared_ptr<Helper::DiskIO> p_configout);

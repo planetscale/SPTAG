@@ -226,7 +226,7 @@ namespace SPTAG {
             }
 
             void Clear(int p_internalResultNum, int p_maxPages, bool enableDataCompression) {
-                if (p_internalResultNum > m_pageBuffers.size()) {
+                if ((std::size_t)p_internalResultNum > m_pageBuffers.size()) {
                     m_postingIDs.reserve(p_internalResultNum);
                     m_processIocp.reset(p_internalResultNum);
                     m_pageBuffers.resize(p_internalResultNum);
@@ -237,8 +237,8 @@ namespace SPTAG {
                     for (int pi = 0; pi < p_internalResultNum; pi++) {
                         m_diskRequests[pi].m_extension = m_processIocp.handle();
                     }
-                } else if (p_maxPages > m_pageBuffers[0].GetPageSize()) {
-                    for (int pi = 0; pi < m_pageBuffers.size(); pi++) m_pageBuffers[pi].ReservePageBuffer(p_maxPages);
+                } else if ((std::size_t)p_maxPages > m_pageBuffers[0].GetPageSize()) {
+                    for (std::size_t pi = 0; pi < m_pageBuffers.size(); pi++) m_pageBuffers[pi].ReservePageBuffer(p_maxPages);
                 }
 
                 m_enableDataCompression = enableDataCompression;

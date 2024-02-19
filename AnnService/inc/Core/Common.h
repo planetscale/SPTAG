@@ -5,11 +5,19 @@
 #define _SPTAG_CORE_COMMONDEFS_H_
 
 #ifdef DEBUG
-#define IF_DEBUG(statement) statement
-#define IF_NDEBUG(statement)
+#ifndef IF_DEBUG
+#   define IF_DEBUG(statement) statement
+#endif
+#ifndef IF_NDEBUG
+#   define IF_NDEBUG(statement)
+#endif
 #else
-#define IF_DEBUG(statement)
-#define IF_NDEBUG(statement) statement
+#ifndef IF_DEBUG
+#   define IF_DEBUG(statement)
+#endif
+#ifndef IF_NDEBUG
+#   define IF_NDEBUG(statement) statement
+#endif
 #endif
 
 #include <cstdint>
@@ -158,9 +166,9 @@ private:
 public:
     MyException(std::string e) { Exp = e; }
 #ifdef _MSC_VER
-    const char* what() const { return Exp.c_str(); }
+    const char* what() const override { return Exp.c_str(); }
 #else
-    const char* what() const noexcept { return Exp.c_str(); }
+    const char* what() const noexcept override { return Exp.c_str(); }
 #endif
 };
 

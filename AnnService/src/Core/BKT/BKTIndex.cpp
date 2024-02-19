@@ -694,7 +694,7 @@ namespace SPTAG
                 workSpace->Initialize(max(m_iMaxCheck, m_pGraph.m_iMaxCheckForRefineGraph), m_iHashTableExp);
             }
             workSpace->Reset(m_iMaxCheck, batch);
-            return std::move(workSpace);
+            return workSpace;
         }
 
         template<typename T>
