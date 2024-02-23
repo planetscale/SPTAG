@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+#ifdef WITH_SPDK
 #include "inc/Test.h"
 // #include "inc/Core/SPANN/ExtraRocksDBController.h"
 #include "inc/Core/SPANN/ExtraSPDKController.h"
@@ -95,3 +96,5 @@ BOOST_AUTO_TEST_CASE(SPDKTest)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+#endif
