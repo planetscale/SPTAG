@@ -16,11 +16,10 @@ typedef typename SPTAG::Helper::Concurrent::ConcurrentMap<std::string, SPTAG::Si
 using namespace SPTAG;
 
 Helper::LoggerHolder& SPTAG::GetLoggerHolder() {
-#ifdef DEBUG
-    auto logLevel = Helper::LogLevel::LL_Debug;
-#else
-    auto logLevel = Helper::LogLevel::LL_Info;
-#endif
+    // TODO: this needs to be quiet always because some MySQL integration tests
+    // explicitly check for all logging in stdout/stderr. Find a way to enable
+    // this when required for debugging.
+    auto logLevel = Helper::LogLevel::LL_Assert;
 #ifdef  _WINDOWS_
     if (auto exeHandle = GetModuleHandleW(nullptr)) {
         if (auto SPTAG_GetLoggerLevel = reinterpret_cast<SPTAG::Helper::LogLevel(*)()>(GetProcAddress(exeHandle, "SPTAG_GetLoggerLevel"))) {
