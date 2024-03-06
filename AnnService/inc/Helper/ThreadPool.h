@@ -26,7 +26,7 @@ namespace SPTAG
             public:
                 Abort(bool p_status = true) { m_stopped = p_status; }
                 ~Abort() {}
-                virtual bool ShouldAbort() { return m_stopped; }
+                virtual bool ShouldAbort() override { return m_stopped; }
                 void SetAbort(bool p_status) { m_stopped = p_status; }
             };
 

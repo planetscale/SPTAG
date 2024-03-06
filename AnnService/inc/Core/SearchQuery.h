@@ -20,10 +20,10 @@ public:
 
     QueryResult()
         : m_target(nullptr),
-          m_resultNum(0),
-          m_withMeta(false),
           m_quantizedTarget(nullptr),
-          m_quantizedSize(0)
+          m_quantizedSize(0),
+          m_resultNum(0),
+          m_withMeta(false)
     {
     }
 
@@ -40,10 +40,10 @@ public:
     
     QueryResult(const void* p_target, int p_resultNum, bool p_withMeta, BasicResult* p_results)
         : m_target(p_target),
-          m_resultNum(p_resultNum),
-          m_withMeta(p_withMeta),
           m_quantizedTarget((void*)p_target),
-          m_quantizedSize(0)
+          m_quantizedSize(0),
+          m_resultNum(p_resultNum),
+          m_withMeta(p_withMeta)
     {
         m_results.Set(p_results, p_resultNum, false);
     }

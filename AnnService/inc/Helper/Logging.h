@@ -10,7 +10,9 @@
 #include <fstream>
 #include <atomic>
 
+#ifdef _MSC_VER
 #pragma warning(disable:4996)
+#endif
 
 namespace SPTAG
 {
@@ -74,7 +76,8 @@ namespace SPTAG
         public:
             SimpleLogger(LogLevel level) : m_level(level) {}
 
-            virtual void Logging(const char* title, LogLevel level, const char* file, int line, const char* func, const char* format, ...)
+            virtual void Logging(const char* title, LogLevel level, const char* file, int line, const char* func, const char* format, ...) override
+                __attribute__ ((format (printf, 7, 8)))
             {
                 if (level < m_level) return;
 
@@ -105,6 +108,7 @@ namespace SPTAG
             }
 
             virtual void Logging(const char* title, LogLevel level, const char* file, int line, const char* func, const char* format, ...) override
+                __attribute__ ((format (printf, 7, 8)))
             {
                 if (level < m_level || m_handle == nullptr || !m_handle->is_open()) return;
 

@@ -135,8 +135,11 @@ namespace SPTAG
             ErrorCode LoadIndexData(const std::vector<std::shared_ptr<Helper::DiskIO>>& p_indexStreams) override;
             ErrorCode LoadIndexDataFromMemory(const std::vector<ByteArray>& p_indexBlobs) override;
 
-            ErrorCode BuildIndex(const void* p_data, SizeType p_vectorNum, DimensionType p_dimension, bool p_normalized = false, bool p_shareOwnership = false);
+            using VectorIndex::BuildIndex;
+            ErrorCode BuildIndex(const void* p_data, SizeType p_vectorNum, DimensionType p_dimension, bool p_normalized = false, bool p_shareOwnership = false) override;
             ErrorCode BuildIndex(bool p_normalized = false) override;
+
+            using VectorIndex::SearchIndex;
             ErrorCode SearchIndex(QueryResult &p_query, bool p_searchDeleted = false) const override;
 
             std::shared_ptr<ResultIterator> GetIterator(const void* p_target, bool p_searchDeleted = false) const override;
@@ -144,7 +147,7 @@ namespace SPTAG
             ErrorCode SearchIndexIterativeEnd(std::unique_ptr<COMMON::WorkSpace> workSpace) const override;
             ErrorCode SearchIndexIterativeEnd(std::unique_ptr<SPANN::ExtraWorkSpace> extraWorkspace) const;
             bool SearchIndexIterativeFromNeareast(QueryResult& p_query, COMMON::WorkSpace* p_space, bool p_isFirst, bool p_searchDeleted = false) const override;
-            std::unique_ptr<COMMON::WorkSpace> RentWorkSpace(int batch) const;
+            std::unique_ptr<COMMON::WorkSpace> RentWorkSpace(int batch) const override;
             ErrorCode SearchIndexIterative(QueryResult& p_headQuery, QueryResult& p_query, COMMON::WorkSpace* p_indexWorkspace, ExtraWorkSpace* p_extraWorkspace, int p_batch, int& resultCount, bool first) const;
 
             ErrorCode SearchIndexWithFilter(QueryResult& p_query, std::function<bool(const ByteArray&)> filterFunc, int maxCheck = 0, bool p_searchDeleted = false) const override;
@@ -155,18 +158,27 @@ namespace SPTAG
                 SearchStats* p_stats = nullptr, std::set<int>* truth = nullptr, std::map<int, std::set<int>>* found = nullptr) const;
             ErrorCode UpdateIndex() override;
 
+            using VectorIndex::SetParameter;
             ErrorCode SetParameter(const char* p_param, const char* p_value, const char* p_section = nullptr) override;
+
+            using VectorIndex::GetParameter;
             std::string GetParameter(const char* p_param, const char* p_section = nullptr) const override;
 
+            using VectorIndex::GetSample;
             inline const void* GetSample(const SizeType idx) const override { return nullptr; }
+
             inline SizeType GetNumDeleted() const override { return m_versionMap.GetDeleteCount(); }
             inline bool NeedRefine() const override { return false; }
             ErrorCode RefineSearchIndex(QueryResult &p_query, bool p_searchDeleted = false) const override { return ErrorCode::Undefined; }
             ErrorCode SearchTree(QueryResult& p_query) const override { return ErrorCode::Undefined; }
-            ErrorCode AddIndex(const void* p_data, SizeType p_vectorNum, DimensionType p_dimension, std::shared_ptr<MetadataSet> p_metadataSet, bool p_withMetaIndex = false, bool p_normalized = false) override;
-            ErrorCode DeleteIndex(const SizeType& p_id) override;
 
+            using VectorIndex::AddIndex;
+            ErrorCode AddIndex(const void* p_data, SizeType p_vectorNum, DimensionType p_dimension, std::shared_ptr<MetadataSet> p_metadataSet, bool p_withMetaIndex = false, bool p_normalized = false) override;
+
+            using VectorIndex::DeleteIndex;
+            ErrorCode DeleteIndex(const SizeType& p_id) override;
             ErrorCode DeleteIndex(const void* p_vectors, SizeType p_vectorNum) override;
+
             ErrorCode RefineIndex(const std::vector<std::shared_ptr<Helper::DiskIO>>& p_indexStreams, IAbortOperation* p_abort) override { return ErrorCode::Undefined; }
             ErrorCode RefineIndex(std::shared_ptr<VectorIndex>& p_newIndex) override { return ErrorCode::Undefined; }
 

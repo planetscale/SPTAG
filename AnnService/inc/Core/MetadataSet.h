@@ -52,21 +52,21 @@ public:
     
     ~FileMetadataSet();
 
-    ByteArray GetMetadata(SizeType p_vectorID) const;
+    ByteArray GetMetadata(SizeType p_vectorID) const override;
 
-    ByteArray GetMetadataCopy(SizeType p_vectorID) const;
+    ByteArray GetMetadataCopy(SizeType p_vectorID) const override;
 
-    SizeType Count() const;
+    SizeType Count() const override;
 
-    bool Available() const;
+    bool Available() const override;
 
-    std::pair<std::uint64_t, std::uint64_t> BufferSize() const;
+    std::pair<std::uint64_t, std::uint64_t> BufferSize() const override;
     
-    void Add(const ByteArray& data);
+    void Add(const ByteArray& data) override;
 
-    ErrorCode SaveMetadata(std::shared_ptr<Helper::DiskIO> p_metaOut, std::shared_ptr<Helper::DiskIO> p_metaIndexOut);
+    ErrorCode SaveMetadata(std::shared_ptr<Helper::DiskIO> p_metaOut, std::shared_ptr<Helper::DiskIO> p_metaIndexOut) override;
 
-    ErrorCode SaveMetadata(const std::string& p_metaFile, const std::string& p_metaindexFile);
+    ErrorCode SaveMetadata(const std::string& p_metaFile, const std::string& p_metaindexFile) override;
 
 private:
     std::shared_ptr<void> m_lock;
@@ -99,21 +99,21 @@ public:
 
     ~MemMetadataSet();
 
-    ByteArray GetMetadata(SizeType p_vectorID) const;
+    ByteArray GetMetadata(SizeType p_vectorID) const override;
     
-    ByteArray GetMetadataCopy(SizeType p_vectorID) const;
+    ByteArray GetMetadataCopy(SizeType p_vectorID) const override;
 
-    SizeType Count() const;
+    SizeType Count() const override;
 
-    bool Available() const;
+    bool Available() const override;
 
-    std::pair<std::uint64_t, std::uint64_t> BufferSize() const;
+    std::pair<std::uint64_t, std::uint64_t> BufferSize() const override;
 
-    void Add(const ByteArray& data);
+    void Add(const ByteArray& data) override;
 
-    ErrorCode SaveMetadata(std::shared_ptr<Helper::DiskIO> p_metaOut, std::shared_ptr<Helper::DiskIO> p_metaIndexOut);
+    ErrorCode SaveMetadata(std::shared_ptr<Helper::DiskIO> p_metaOut, std::shared_ptr<Helper::DiskIO> p_metaIndexOut) override;
 
-    ErrorCode SaveMetadata(const std::string& p_metaFile, const std::string& p_metaindexFile);
+    ErrorCode SaveMetadata(const std::string& p_metaFile, const std::string& p_metaindexFile) override;
 
 private:
     ErrorCode Init(std::shared_ptr<Helper::DiskIO> p_metain, std::shared_ptr<Helper::DiskIO> p_metaindexin,
