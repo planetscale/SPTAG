@@ -329,7 +329,7 @@ namespace SPTAG {
 
             virtual void GetWritePosting(SizeType pid, std::string& posting, bool write = false) { return; }
 
-            virtual bool Initialize() { return false; }
+            virtual bool Initialize() { return true; }
 
             virtual bool ExitBlockController() { return false; }
 

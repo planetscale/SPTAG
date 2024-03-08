@@ -131,11 +131,6 @@ namespace SPTAG::SPANN
                 dbOptions.use_direct_reads = true;
             }
 
-            auto s = rocksdb::DB::Open(dbOptions, dbPath, &db);
-            SPTAGLIB_LOG(Helper::LogLevel::LL_Info, "SPFresh: New Rocksdb: %s\n", filePath);
-            if (s != rocksdb::Status::OK()) {
-                SPTAGLIB_LOG(Helper::LogLevel::LL_Error, "\e[0;31mRocksdb Open Error\e[0m: %s\n", s.getState());
-            }
         }
 
         ~RocksDBIO() override {
@@ -148,6 +143,18 @@ namespace SPTAG::SPANN
             if (db) {
                 ShutDown();
 	    }
+        }
+
+        bool Initialize(bool debug = false) override {
+            if (!db) {
+                SPTAGLIB_LOG(Helper::LogLevel::LL_Info, "SPFresh: New Rocksdb: %s\n", dbPath.c_str());
+                auto s = rocksdb::DB::Open(dbOptions, dbPath, &db);
+                if (s != rocksdb::Status::OK()) {
+                    SPTAGLIB_LOG(Helper::LogLevel::LL_Error, "\e[0;31mRocksdb Open Error\e[0m: %s\n", s.getState());
+                    return false;
+                }
+            }
+            return true;
         }
 
         void ShutDown() override {

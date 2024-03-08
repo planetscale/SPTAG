@@ -131,6 +131,9 @@ ErrorCode Index<T>::LoadIndexDataFromMemory(
       m_extraSearcher.reset(new ExtraStaticSearcher<T>());
     }
   }
+  if (!m_extraSearcher->Initialize()) {
+    return ErrorCode::DiskIOFail;
+  }
 
   if (!m_extraSearcher->LoadIndex(m_options, m_versionMap, m_vectorTranslateMap,
                                   m_index))
@@ -216,6 +219,9 @@ ErrorCode Index<T>::LoadIndexData(
     } else {
       m_extraSearcher.reset(new ExtraStaticSearcher<T>());
     }
+  }
+  if (!m_extraSearcher->Initialize()) {
+    return ErrorCode::DiskIOFail;
   }
 
   if (!m_options.m_recovery) {
@@ -1217,6 +1223,9 @@ ErrorCode Index<T>::BuildIndexInternal(
       } else {
         m_extraSearcher.reset(new ExtraStaticSearcher<T>());
       }
+    }
+    if (!m_extraSearcher->Initialize()) {
+      return ErrorCode::DiskIOFail;
     }
 
     if (m_options.m_buildSsdIndex) {
