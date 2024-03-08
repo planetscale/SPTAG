@@ -945,6 +945,7 @@ bool Index<T>::SelectHeadInternal(
     selected.push_back(0);
   } else if (Helper::StrUtils::StrEqualIgnoreCase(
                  m_options.m_selectType.c_str(), "Random")) {
+random_head_selection:
     SPTAGLIB_LOG(Helper::LogLevel::LL_Info, "Start generating Random head.\n");
     selected.resize(data.R());
     for (int i = 0; i < data.R(); i++) selected[i] = i;
@@ -998,9 +999,9 @@ bool Index<T>::SelectHeadInternal(
     SelectHeadDynamically(bkt, data.R(), selected);
 
     if (selected.empty()) {
-      SPTAGLIB_LOG(Helper::LogLevel::LL_Error,
+      SPTAGLIB_LOG(Helper::LogLevel::LL_Warning,
                    "Can't select any vector as head with current settings\n");
-      return false;
+      goto random_head_selection;
     }
   }
 
