@@ -287,7 +287,7 @@ namespace SPTAG
 
                 SizeType begin;
                 {
-                    std::lock_guard<std::mutex> lock(m_dataAddLock);
+                    std::lock_guard<std::mutex> lock2(m_dataAddLock);
 
                     begin = m_versionMap.GetVectorNum();
 
