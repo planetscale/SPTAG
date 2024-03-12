@@ -505,8 +505,8 @@ break;
             
             BKTree(const BKTree& other): 
                                    m_lock(new std::shared_timed_mutex),
-                                   m_iTreeNumber(other.m_iTreeNumber), 
-                                   m_iBKTKmeansK(other.m_iBKTKmeansK), 
+                                   m_iTreeNumber(other.m_iTreeNumber),
+                                   m_iBKTKmeansK(other.m_iBKTKmeansK),
                                    m_iBKTLeafSize(other.m_iBKTLeafSize),
                                    m_iSamples(other.m_iSamples),
                                    m_fBalanceFactor(other.m_fBalanceFactor),

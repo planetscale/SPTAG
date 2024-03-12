@@ -122,18 +122,18 @@ namespace SPTAG
 
             ~Index() {}
 
-            inline SizeType GetNumSamples() const { return m_pSamples.R(); }
-            inline SizeType GetNumDeleted() const { return (SizeType)m_deletedID.Count(); }
-            inline DimensionType GetFeatureDim() const { return m_pSamples.C(); }
+            inline SizeType GetNumSamples() const override { return m_pSamples.R(); }
+            inline SizeType GetNumDeleted() const override { return (SizeType)m_deletedID.Count(); }
+            inline DimensionType GetFeatureDim() const override { return m_pSamples.C(); }
         
             inline int GetCurrMaxCheck() const { return m_iMaxCheck; }
             inline int GetNumThreads() const { return m_iNumberOfThreads; }
-            inline DistCalcMethod GetDistCalcMethod() const { return m_iDistCalcMethod; }
-            inline IndexAlgoType GetIndexAlgoType() const { return IndexAlgoType::BKT; }
-            inline VectorValueType GetVectorValueType() const { return GetEnumValueType<T>(); }
-            void SetQuantizer(std::shared_ptr<SPTAG::COMMON::IQuantizer> quantizer);
+            inline DistCalcMethod GetDistCalcMethod() const override { return m_iDistCalcMethod; }
+            inline IndexAlgoType GetIndexAlgoType() const override { return IndexAlgoType::BKT; }
+            inline VectorValueType GetVectorValueType() const override { return GetEnumValueType<T>(); }
+            void SetQuantizer(std::shared_ptr<SPTAG::COMMON::IQuantizer> quantizer) override;
             
-            inline float AccurateDistance(const void* pX, const void* pY) const { 
+            inline float AccurateDistance(const void* pX, const void* pY) const override {
                 if (m_iDistCalcMethod == DistCalcMethod::L2) return m_fComputeDistance((const T*)pX, (const T*)pY, m_pSamples.C());
 
                 float xy = m_iBaseSquare - m_fComputeDistance((const T*)pX, (const T*)pY, m_pSamples.C());
@@ -141,14 +141,15 @@ namespace SPTAG
                 float yy = m_iBaseSquare - m_fComputeDistance((const T*)pY, (const T*)pY, m_pSamples.C());
                 return 1.0f - xy / (sqrt(xx) * sqrt(yy));
             }
-            inline float ComputeDistance(const void* pX, const void* pY) const { return m_fComputeDistance((const T*)pX, (const T*)pY, m_pSamples.C()); }
-            inline float GetDistance(const void* target, const SizeType idx) const {
+            inline float ComputeDistance(const void* pX, const void* pY) const override { return m_fComputeDistance((const T*)pX, (const T*)pY, m_pSamples.C()); }
+            inline float GetDistance(const void* target, const SizeType idx) const override {
                 return ComputeDistance(target, m_pSamples.At(idx));
             }
-            inline const void* GetSample(const SizeType idx) const { return (void*)m_pSamples[idx]; }
-            inline bool ContainSample(const SizeType idx) const { return idx >= 0 && idx < m_deletedID.R() && !m_deletedID.Contains(idx); }
-            inline bool NeedRefine() const { return m_deletedID.Count() > (size_t)(GetNumSamples() * m_fDeletePercentageForRefine); }
-            std::shared_ptr<std::vector<std::uint64_t>> BufferSize() const
+            using VectorIndex::GetSample;
+            inline const void* GetSample(const SizeType idx) const override { return (void*)m_pSamples[idx]; }
+            inline bool ContainSample(const SizeType idx) const override { return idx >= 0 && idx < m_deletedID.R() && !m_deletedID.Contains(idx); }
+            inline bool NeedRefine() const override { return m_deletedID.Count() > (size_t)(GetNumSamples() * m_fDeletePercentageForRefine); }
+            std::shared_ptr<std::vector<std::uint64_t>> BufferSize() const override
             {
                 std::shared_ptr<std::vector<std::uint64_t>> buffersize(new std::vector<std::uint64_t>);
                 buffersize->push_back(m_pSamples.BufferSize());
@@ -158,7 +159,7 @@ namespace SPTAG
                 return buffersize;
             }
 
-            std::shared_ptr<std::vector<std::string>> GetIndexFiles() const
+            std::shared_ptr<std::vector<std::string>> GetIndexFiles() const override
             {
                 std::shared_ptr<std::vector<std::string>> files(new std::vector<std::string>);
                 files->push_back(m_sDataPointsFilename);
@@ -168,37 +169,43 @@ namespace SPTAG
                 return files;
             }
 
-            ErrorCode SaveConfig(std::shared_ptr<Helper::DiskIO> p_configout);
-            ErrorCode SaveIndexData(const std::vector<std::shared_ptr<Helper::DiskIO>>& p_indexStreams);
+            ErrorCode SaveConfig(std::shared_ptr<Helper::DiskIO> p_configout) override;
+            ErrorCode SaveIndexData(const std::vector<std::shared_ptr<Helper::DiskIO>>& p_indexStreams) override;
 
-            ErrorCode LoadConfig(Helper::IniReader& p_reader);
-            ErrorCode LoadIndexData(const std::vector<std::shared_ptr<Helper::DiskIO>>& p_indexStreams);
-            ErrorCode LoadIndexDataFromMemory(const std::vector<ByteArray>& p_indexBlobs);
+            ErrorCode LoadConfig(Helper::IniReader& p_reader) override;
+            ErrorCode LoadIndexData(const std::vector<std::shared_ptr<Helper::DiskIO>>& p_indexStreams) override;
+            ErrorCode LoadIndexDataFromMemory(const std::vector<ByteArray>& p_indexBlobs) override;
 
-            ErrorCode BuildIndex(const void* p_data, SizeType p_vectorNum, DimensionType p_dimension, bool p_normalized = false, bool p_shareOwnership = false);
-            ErrorCode SearchIndex(QueryResult &p_query, bool p_searchDeleted = false) const;
+            using VectorIndex::BuildIndex;
+            ErrorCode BuildIndex(const void* p_data, SizeType p_vectorNum, DimensionType p_dimension, bool p_normalized = false, bool p_shareOwnership = false) override;
+            using VectorIndex::SearchIndex;
+            ErrorCode SearchIndex(QueryResult &p_query, bool p_searchDeleted = false) const override;
 
-            std::shared_ptr<ResultIterator> GetIterator(const void* p_target, bool p_searchDeleted = false) const;
-            ErrorCode SearchIndexIterativeNext(QueryResult& p_query, COMMON::WorkSpace* workSpace, int p_batch, int& resultCount, bool p_isFirst, bool p_searchDeleted) const;
-            ErrorCode SearchIndexIterativeEnd(std::unique_ptr<COMMON::WorkSpace> workSpace) const;
-            bool SearchIndexIterativeFromNeareast(QueryResult& p_query, COMMON::WorkSpace* p_space, bool p_isFirst, bool p_searchDeleted = false) const;
-            std::unique_ptr<COMMON::WorkSpace> RentWorkSpace(int batch) const;
-            ErrorCode SearchIndexWithFilter(QueryResult& p_query, std::function<bool(const ByteArray&)> filterFunc, int maxCheck = 0, bool p_searchDeleted = false) const;
-            ErrorCode RefineSearchIndex(QueryResult &p_query, bool p_searchDeleted = false) const;
-            ErrorCode SearchTree(QueryResult &p_query) const;
-            ErrorCode AddIndex(const void* p_data, SizeType p_vectorNum, DimensionType p_dimension, std::shared_ptr<MetadataSet> p_metadataSet, bool p_withMetaIndex = false, bool p_normalized = false);
-            ErrorCode AddIndexIdx(SizeType begin, SizeType end);
-            ErrorCode AddIndexId(const void* p_data, SizeType p_vectorNum, DimensionType p_dimension, int& beginHead, int& endHead);
-            ErrorCode DeleteIndex(const void* p_vectors, SizeType p_vectorNum);
-            ErrorCode DeleteIndex(const SizeType& p_id);
+            std::shared_ptr<ResultIterator> GetIterator(const void* p_target, bool p_searchDeleted = false) const override;
+            ErrorCode SearchIndexIterativeNext(QueryResult& p_query, COMMON::WorkSpace* workSpace, int p_batch, int& resultCount, bool p_isFirst, bool p_searchDeleted) const override;
+            ErrorCode SearchIndexIterativeEnd(std::unique_ptr<COMMON::WorkSpace> workSpace) const override;
+            bool SearchIndexIterativeFromNeareast(QueryResult& p_query, COMMON::WorkSpace* p_space, bool p_isFirst, bool p_searchDeleted = false) const override;
+            std::unique_ptr<COMMON::WorkSpace> RentWorkSpace(int batch) const override;
+            ErrorCode SearchIndexWithFilter(QueryResult& p_query, std::function<bool(const ByteArray&)> filterFunc, int maxCheck = 0, bool p_searchDeleted = false) const override;
+            ErrorCode RefineSearchIndex(QueryResult &p_query, bool p_searchDeleted = false) const override;
+            ErrorCode SearchTree(QueryResult &p_query) const override;
+            using VectorIndex::AddIndex;
+            ErrorCode AddIndex(const void* p_data, SizeType p_vectorNum, DimensionType p_dimension, std::shared_ptr<MetadataSet> p_metadataSet, bool p_withMetaIndex = false, bool p_normalized = false) override;
+            ErrorCode AddIndexIdx(SizeType begin, SizeType end) override;
+            ErrorCode AddIndexId(const void* p_data, SizeType p_vectorNum, DimensionType p_dimension, int& beginHead, int& endHead) override;
+            using VectorIndex::DeleteIndex;
+            ErrorCode DeleteIndex(const void* p_vectors, SizeType p_vectorNum) override;
+            ErrorCode DeleteIndex(const SizeType& p_id) override;
 
-            ErrorCode SetParameter(const char* p_param, const char* p_value, const char* p_section = nullptr);
-            std::string GetParameter(const char* p_param, const char* p_section = nullptr) const;
-            ErrorCode UpdateIndex();
+            using VectorIndex::SetParameter;
+            ErrorCode SetParameter(const char* p_param, const char* p_value, const char* p_section = nullptr) override;
+            using VectorIndex::GetParameter;
+            std::string GetParameter(const char* p_param, const char* p_section = nullptr) const override;
+            ErrorCode UpdateIndex() override;
 
-            ErrorCode RefineIndex(const std::vector<std::shared_ptr<Helper::DiskIO>>& p_indexStreams, IAbortOperation* p_abort);
-            ErrorCode RefineIndex(std::shared_ptr<VectorIndex>& p_newIndex);
-            ErrorCode SetWorkSpaceFactory(std::unique_ptr<SPTAG::COMMON::IWorkSpaceFactory<SPTAG::COMMON::IWorkSpace>> up_workSpaceFactory)
+            ErrorCode RefineIndex(const std::vector<std::shared_ptr<Helper::DiskIO>>& p_indexStreams, IAbortOperation* p_abort) override;
+            ErrorCode RefineIndex(std::shared_ptr<VectorIndex>& p_newIndex) override;
+            ErrorCode SetWorkSpaceFactory(std::unique_ptr<SPTAG::COMMON::IWorkSpaceFactory<SPTAG::COMMON::IWorkSpace>> up_workSpaceFactory) override
             {
                 SPTAG::COMMON::IWorkSpaceFactory<SPTAG::COMMON::IWorkSpace>* raw_generic_ptr = up_workSpaceFactory.release();
                 if (!raw_generic_ptr) return ErrorCode::Fail;

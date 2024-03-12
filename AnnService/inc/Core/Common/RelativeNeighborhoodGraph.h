@@ -15,7 +15,7 @@ namespace SPTAG
         public:
             RelativeNeighborhoodGraph() { m_pNeighborhoodGraph.SetName("RNG"); }
 
-            void RebuildNeighbors(VectorIndex* index, const SizeType node, SizeType* nodes, const BasicResult* queryResults, const int numResults) {
+            void RebuildNeighbors(VectorIndex* index, const SizeType node, SizeType* nodes, const BasicResult* queryResults, const int numResults) override {
                 DimensionType count = 0;
                 for (int j = 0; j < numResults && count < m_iNeighborhoodSize; j++) {
                     const BasicResult& item = queryResults[j];
@@ -34,7 +34,7 @@ namespace SPTAG
                 for (DimensionType j = count; j < m_iNeighborhoodSize; j++)  nodes[j] = -1;
             }
 
-            void InsertNeighbors(VectorIndex* index, const SizeType node, SizeType insertNode, float insertDist)
+            void InsertNeighbors(VectorIndex* index, const SizeType node, SizeType insertNode, float insertDist) override
             {                
                 SizeType* nodes = m_pNeighborhoodGraph[node];
                 const void* nodeVec = index->GetSample(node);
