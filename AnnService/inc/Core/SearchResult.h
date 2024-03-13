@@ -67,6 +67,7 @@ namespace SPTAG
         SizeType VID;
         float Dist;
         ByteArray Meta;
+        ByteArray Sample;
         bool RelaxedMono;
 
         BasicResult() : VID(-1), Dist(MaxDist), RelaxedMono(false) {}

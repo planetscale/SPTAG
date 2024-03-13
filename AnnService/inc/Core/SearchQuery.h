@@ -23,7 +23,8 @@ public:
           m_quantizedTarget(nullptr),
           m_quantizedSize(0),
           m_resultNum(0),
-          m_withMeta(false)
+          m_withMeta(false),
+          m_withSamples(false)
     {
     }
 
@@ -32,9 +33,9 @@ public:
         Init(nullptr, p_resultNum, true);
     }
 
-    QueryResult(const void* p_target, int p_resultNum, bool p_withMeta)
+    QueryResult(const void* p_target, int p_resultNum, bool p_withMeta = false, bool p_withSamples = false)
     {
-        Init(p_target, p_resultNum, p_withMeta);
+        Init(p_target, p_resultNum, p_withMeta, p_withSamples);
     }
 
     
@@ -93,11 +94,12 @@ public:
     }
 
 
-    inline void Init(const void* p_target, int p_resultNum, bool p_withMeta)
+    inline void Init(const void* p_target, int p_resultNum, bool p_withMeta = false, bool p_withSamples = false)
     {
         m_target = p_target;
         m_resultNum = p_resultNum;
         m_withMeta = p_withMeta;
+        m_withSamples = p_withSamples;
         m_quantizedTarget = (void*)p_target;
         m_quantizedSize = 0;
 
@@ -177,6 +179,11 @@ public:
         return m_results.Data();
     }
 
+    inline bool WithSamples() const
+    {
+        return m_withSamples;
+    }
+
 
     inline bool WithMeta() const
     {
@@ -211,6 +218,7 @@ public:
             m_results[i].VID = -1;
             m_results[i].Dist = MaxDist;
             m_results[i].Meta.Clear();
+            m_results[i].Sample.Clear();
         }
     }
 
@@ -249,6 +257,7 @@ protected:
     int m_resultNum;
 
     bool m_withMeta;
+    bool m_withSamples;
 
     Array<BasicResult> m_results;
 };

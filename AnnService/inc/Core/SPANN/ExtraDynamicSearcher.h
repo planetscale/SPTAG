@@ -1245,14 +1245,17 @@ namespace SPTAG::SPANN {
             SearchStats* p_stats, std::set<int>* truth, std::map<int, std::set<int>>* found) override
         {
             auto exStart = std::chrono::high_resolution_clock::now();
+            std::chrono::microseconds remainLimit = std::chrono::microseconds::max();
 
             // const auto postingListCount = static_cast<uint32_t>(p_exWorkSpace->m_postingIDs.size());
 
             p_exWorkSpace->m_deduper.clear();
 
-            auto exSetUpEnd = std::chrono::high_resolution_clock::now();
-
-            p_stats->m_exSetUpLatency = ((double)std::chrono::duration_cast<std::chrono::microseconds>(exSetUpEnd - exStart).count()) / 1000;
+            if (p_stats) {
+                auto exSetUpEnd = std::chrono::high_resolution_clock::now();
+                p_stats->m_exSetUpLatency = ((double)std::chrono::duration_cast<std::chrono::microseconds>(exSetUpEnd - exStart).count()) / 1000;
+                remainLimit = m_hardLatencyLimit - std::chrono::microseconds((int)p_stats->m_totalLatency);
+            }
 
             COMMON::QueryResultSet<ValueType>& queryResults = *((COMMON::QueryResultSet<ValueType>*) & p_queryResults);
 
@@ -1264,8 +1267,6 @@ namespace SPTAG::SPANN {
             double readLatency = 0;
 
             std::vector<std::string> postingLists;
-
-            std::chrono::microseconds remainLimit = m_hardLatencyLimit - std::chrono::microseconds((int)p_stats->m_totalLatency);
 
             auto readStart = std::chrono::high_resolution_clock::now();
             db->MultiGet(p_exWorkSpace->m_postingIDs, &postingLists, remainLimit);
@@ -1302,7 +1303,7 @@ namespace SPTAG::SPANN {
                         continue;
                     }
                     auto distance2leaf = p_index->ComputeDistance(queryResults.GetQuantizedTarget(), vectorInfo + m_metaDataSize);
-                    queryResults.AddPoint(vectorID, distance2leaf);
+                    queryResults.AddPoint(vectorID, distance2leaf, vectorInfo + m_metaDataSize, m_vectorInfoSize - m_metaDataSize);
                 }
                 auto compEnd = std::chrono::high_resolution_clock::now();
                 if (realNum <= m_mergeThreshold && !m_opt->m_inPlace) MergeAsync(p_index.get(), curPostingID);

@@ -200,7 +200,7 @@ namespace SPTAG
                     
                 if (notDeleted(m_deletedID, gnode.node))
                 {
-                    if (!p_query.AddPoint(gnode.node, gnode.distance) && p_space.m_iNumberOfCheckedLeaves > p_space.m_iMaxCheck) 
+                    if (!p_query.AddPoint(gnode.node, gnode.distance, (m_pSamples)[gnode.node], GetFeatureDim() * sizeof(T)) && p_space.m_iNumberOfCheckedLeaves > p_space.m_iMaxCheck) 
                     {
                         p_query.SortResult();
                         return;

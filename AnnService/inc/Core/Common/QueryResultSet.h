@@ -74,16 +74,27 @@ public:
         return m_results[0].Dist;
     }
 
-    bool AddPoint(const SizeType index, float dist)
+    bool AddPoint(const SizeType index, float dist, const void *sample, SizeType sample_length)
     {
         if (dist < m_results[0].Dist || (dist == m_results[0].Dist && index < m_results[0].VID))
         {
             m_results[0].VID = index;
             m_results[0].Dist = dist;
+
+            if (m_withSamples && sample) {
+                m_results[0].Sample = ByteArray::Alloc(sample_length);
+                memcpy(m_results[0].Sample.Data(), sample, sample_length);
+            }
+
             Heapify(m_resultNum);
             return true;
         }
         return false;
+    }
+
+    bool AddPoint(const SizeType index, float dist)
+    {
+        return AddPoint(index, dist, nullptr, 0);
     }
 
     inline void SortResult()

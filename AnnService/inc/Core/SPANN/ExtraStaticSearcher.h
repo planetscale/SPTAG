@@ -126,7 +126,7 @@ namespace SPTAG
             if (p_exWorkSpace->m_deduper.CheckAndSet(vectorID)) continue; \
             (this->*m_parseEncoding)(p_index, listInfo, (ValueType*)(p_postingListFullData + offsetVector));\
             auto distance2leaf = p_index->ComputeDistance(queryResults.GetQuantizedTarget(), p_postingListFullData + offsetVector); \
-            queryResults.AddPoint(vectorID, distance2leaf); \
+            queryResults.AddPoint(vectorID, distance2leaf, p_postingListFullData + offsetVector, p_index->GetFeatureDim() * sizeof(ValueType)); \
         } \
 
 #define ProcessPostingOffset() \
@@ -138,7 +138,7 @@ namespace SPTAG
             if (p_exWorkSpace->m_deduper.CheckAndSet(vectorID)) continue; \
             (this->*m_parseEncoding)(p_index, listInfo, (ValueType*)(p_postingListFullData + offsetVector));\
             auto distance2leaf = p_index->ComputeDistance(queryResults.GetQuantizedTarget(), p_postingListFullData + offsetVector); \
-            queryResults.AddPoint(vectorID, distance2leaf); \
+            queryResults.AddPoint(vectorID, distance2leaf, p_postingListFullData + offsetVector, p_index->GetFeatureDim() * sizeof(ValueType)); \
             foundResult = true;\
             break;\
         } \

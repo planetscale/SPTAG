@@ -316,7 +316,7 @@ namespace SPTAG
                         {
                             if (checkFilter(m_pMetadata, tmpNode, filterFunc))
                             {
-                                p_query.AddPoint(tmpNode, gnode.distance);
+                                p_query.AddPoint(tmpNode, gnode.distance, (m_pSamples)[tmpNode], GetFeatureDim() * sizeof(T));
                             }
                         }
                     }
@@ -379,7 +379,7 @@ namespace SPTAG
                 }
                 if (notDeleted(m_deletedID, tmpNode))
                 {
-                    p_query.AddPoint(tmpNode, gnode.distance);
+                    p_query.AddPoint(tmpNode, gnode.distance, (m_pSamples)[tmpNode], GetFeatureDim() * sizeof(T));
                     count++;
                     if (gnode.distance > p_space.m_Results.worst() || 
                         p_space.m_iNumberOfCheckedLeaves > p_space.m_iMaxCheck) {
