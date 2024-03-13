@@ -11,3 +11,6 @@
 [submodule "ThirdParty/RocksDB"]
 	path = ThirdParty/RocksDB
 	url = git@github.com:facebook/rocksdb.git
+[submodule "ThirdParty/simde"]
+	path = ThirdParty/simde
+	url = git@github.com:simd-everywhere/simde.git
