@@ -9,15 +9,18 @@
 #ifndef GPU
 
 #ifndef _MSC_VER
+#ifdef __x86_64__
 #include <cpuid.h>
+void cpuid(int info[4], int InfoType);
+#include <xmmintrin.h>
+#include <immintrin.h>
+#else
 #include <simde/x86/sse.h>
 #include <simde/x86/avx.h>
 #include <simde/x86/avx2.h>
 #include <simde/x86/avx512.h>
 SIMDE_DISABLE_UNWANTED_DIAGNOSTICS
-
-void cpuid(int info[4], int InfoType);
-
+#endif
 #else
 #include <intrin.h>
 #define cpuid(info, x)    __cpuidex(info, x, 0)

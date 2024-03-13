@@ -3,6 +3,7 @@
 
 set(AnnService ${PROJECT_SOURCE_DIR}/AnnService)
 set(Zstd ${PROJECT_SOURCE_DIR}/ThirdParty/zstd)
+set(SIMDE ${PROJECT_SOURCE_DIR}/ThirdParty/simde)
 
 option(WITH_SPDK "Enable SPDK" OFF)
 
@@ -19,6 +20,7 @@ endif()
 
 include_directories(${AnnService})
 include_directories(${Zstd}/lib)
+include_directories(${SIMDE})
 
 file(GLOB_RECURSE HDR_FILES ${AnnService}/inc/Core/*.h  ${AnnService}/inc/Helper/*.h)
 file(GLOB_RECURSE SRC_FILES ${AnnService}/src/Core/*.cpp ${AnnService}/src/Helper/*.cpp)
@@ -47,8 +49,12 @@ add_library (DistanceUtils STATIC
     )
 
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
-    target_compile_options(DistanceUtils PRIVATE -fPIC -fopenmp-simd -O3)
-    target_compile_definitions(DistanceUtils PRIVATE SIMDE_ENABLE_NATIVE_ALIASES SIMDE_ENABLE_OPENMP)
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64.*|AARCH64.*|arm64.*|ARM64.*)")
+        target_compile_options(DistanceUtils PRIVATE -fPIC -fopenmp-simd -O3)
+        add_definitions(-DSIMDE_ENABLE_NATIVE_ALIASES -DSIMDE_ENABLE_OPENMP)
+    else()
+        target_compile_options(DistanceUtils PRIVATE -mavx2 -mavx -msse -msse2 -mavx512f -mavx512bw -mavx512dq -fPIC)
+    endif()
 endif()
 
 find_package(TBB REQUIRED)

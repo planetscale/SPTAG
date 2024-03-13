@@ -43,7 +43,13 @@
 #if defined(__INTEL_COMPILER)
 #include <malloc.h>
 #else
+#ifdef __x86_64__
 #include <mm_malloc.h>
+#else
+#include <malloc.h>
+#define _mm_malloc(a, b) memalign(b, a)
+#define _mm_free(a) free(a)
+#endif
 #endif
 
 #define FolderSep '/'

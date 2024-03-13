@@ -2,9 +2,11 @@
 #include "inc/Core/Common.h"
 
 #ifndef _MSC_VER
+#ifdef __x86_64__
 void cpuid(int info[4], int InfoType) {
     __cpuid_count(InfoType, 0, info[0], info[1], info[2], info[3]);
 }
+#endif
 #endif
 
 namespace SPTAG {
@@ -41,6 +43,7 @@ namespace SPTAG {
             HW_AVX512{ false },
             HW_AVX2{ false }
         {
+#ifdef __x86_64__
             int info[4];
             cpuid(info, 0);
             int nIds = info[0];
@@ -64,6 +67,16 @@ namespace SPTAG {
 #endif
 #endif
             }
+#else
+// Assuming that we're for now off well enough with emulating AVX2 using Neon for arm64. Can
+// revisit if we need to lower this to just AVX or SSE2.
+            HW_SSE = true;
+            HW_SSE2 = true;
+            HW_AVX = true;
+            HW_AVX2 = true;
+            HW_AVX512 = false;
+#endif
+
 #if 0
             if (HW_AVX512)
                 SPTAGLIB_LOG(Helper::LogLevel::LL_Info, "Using AVX512 InstructionSet!\n");
