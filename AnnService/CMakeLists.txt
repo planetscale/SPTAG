@@ -20,7 +20,6 @@ endif()
 
 include_directories(${AnnService})
 include_directories(${Zstd}/lib)
-include_directories(${SIMDE})
 
 file(GLOB_RECURSE HDR_FILES ${AnnService}/inc/Core/*.h  ${AnnService}/inc/Helper/*.h)
 file(GLOB_RECURSE SRC_FILES ${AnnService}/src/Core/*.cpp ${AnnService}/src/Helper/*.cpp)
@@ -51,7 +50,8 @@ add_library (DistanceUtils STATIC
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
     if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64.*|AARCH64.*|arm64.*|ARM64.*)")
         target_compile_options(DistanceUtils PRIVATE -fPIC -fopenmp-simd -O3)
-        add_definitions(-DSIMDE_ENABLE_NATIVE_ALIASES -DSIMDE_ENABLE_OPENMP)
+        target_compile_definitions(DistanceUtils PRIVATE -DSIMDE_ENABLE_NATIVE_ALIASES -DSIMDE_ENABLE_OPENMP)
+        target_include_directories(DistanceUtils PRIVATE ${SIMDE})
     else()
         target_compile_options(DistanceUtils PRIVATE -mavx2 -mavx -msse -msse2 -mavx512f -mavx512bw -mavx512dq -fPIC)
     endif()
