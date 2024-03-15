@@ -104,7 +104,7 @@ else()
 endif()
 
 option(GPU "GPU" ON)
-option(LIBRARYONLY "LIBRARYONLY" ON)
+option(LIBRARYONLY "LIBRARYONLY" OFF)
 option(ROCKSDB "ROCKSDB" ON)
 
 if (LIBRARYONLY)
@@ -143,7 +143,3 @@ endif()
 add_subdirectory (AnnService)
 add_subdirectory (Test)
 add_subdirectory (GPUSupport)
-
-if (NOT LIBRARYONLY)
-    add_subdirectory (Wrappers)
-endif()

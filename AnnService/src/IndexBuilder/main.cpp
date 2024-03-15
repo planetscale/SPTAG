@@ -5,119 +5,112 @@
 #include "inc/Core/VectorIndex.h"
 #include "inc/Core/Common.h"
 #include "inc/Helper/SimpleIniReader.h"
+#include "inc/Core/BKT/Index.h"
+#include "inc/Core/Common/DistanceUtils.h"
+#include "inc/Core/SPANN/Index.h"
+#include "inc/Core/ResultIterator.h"
 
+#include <assert.h>
+#include <math.h>
 #include <memory>
-#include <inc/Core/Common/DistanceUtils.h>
 
-using namespace SPTAG;
+// error codes: AnnService/inc/Core/DefinitionList.h
+#define CHECK(cmd) do { auto err = cmd; if (err != SPTAG::ErrorCode::Success) { printf("%s: err=%d\n", #cmd, (int)err); exit(1); } } while(0)
 
-class BuilderOptions : public Helper::ReaderOptions
-{
-public:
-    BuilderOptions() : Helper::ReaderOptions(VectorValueType::Float, 0, VectorFileType::TXT, "|", 32)
-    {        
-        AddRequiredOption(m_outputFolder, "-o", "--outputfolder", "Output folder.");
-        AddRequiredOption(m_indexAlgoType, "-a", "--algo", "Index Algorithm type.");
-        AddOptionalOption(m_inputFiles, "-i", "--input", "Input raw data.");
-        AddOptionalOption(m_builderConfigFile, "-c", "--config", "Config file for builder.");
-        AddOptionalOption(m_quantizerFile, "-pq", "--quantizer", "Quantizer File");
-        AddOptionalOption(m_metaMapping, "-m", "--metaindex", "Enable delete vectors through metadata");
-    }
+int main(int argc, char **argv) {
+	std::string disk_path = "/tmp/t1.spann";
+	std::string distance_func = "L2";
+	float vectors[] = {
+		5.6, 8.2, 2.5, 8.1, 1.6,
+		9.3, 5.8, 7.7, 7.4, 8.8,
+		9.7, 5.3, 0.5, 6.3, 6.9,
+		2.0, 9.6, 6.6, 7.0, 9.7,
+		4.1, 7.6, 5.1, 4.3, 3.8,
+		4.3, 9.9, 0.6, 5.4, 5.4,
+		6.7, 2.0, 7.6, 6.6, 3.9,
+		7.7, 8.3, 9.5, 1.8, 6.5,
+		4.9, 1.2, 0.8, 3.4, 4.6,
+		9.9, 2.2, 8.2, 1.9, 8.8,
+		2.4, 2.9, 4.0, 6.1, 3.5,
+		7.2, 0.6, 2.4, 6.6, 2.4,
+		5.5, 6.9, 6.6, 2.7, 1.8,
+		0.2, 4.3, 7.3, 6.2, 4.0,
+		7.2, 8.7, 7.8, 4.9, 5.5,
+		0.9, 0.7, 2.4, 5.1, 8.4,
+		9.4, 7.6, 6.9, 5.9, 0.4,
+		7.6, 2.6, 5.4, 8.0, 4.5,
+		7.1, 0.3, 0.3, 6.7, 5.9,
+		4.3, 6.5, 6.3, 5.2, 3.3,
+	};
+	const int dimension = 5;
+	const size_t nvectors = sizeof(vectors)/sizeof(vectors[0])/dimension;
 
-    ~BuilderOptions() {}
+	SPTAG::SetLogger(std::make_shared<SPTAG::Helper::SimpleLogger>(SPTAG::Helper::LogLevel::LL_Debug));
 
-    std::string m_inputFiles;
+	// configure the index
+	auto index = new SPTAG::SPANN::Index<float>();
+	CHECK(index->SetParameter("DistCalcMethod", distance_func, "Base"));
+	auto options = index->GetOptions();
+	options->m_valueType = SPTAG::VectorValueType::Float;
+	options->m_useKV = true;
+	options->m_enableSSD = true;
+	options->m_indexAlgoType = SPTAG::IndexAlgoType::BKT;
+	options->m_selectHead = true;
+	options->m_buildHead = true;
+	options->m_buildSsdIndex = true;
+	options->m_update = true;
+	options->m_indexDirectory = disk_path;
+	options->m_KVPath = disk_path + "/rocks";
+	options->m_deleteIDFile = disk_path + "/DeletedIDs.bin";
+	options->m_ssdInfoFile = disk_path + "/ssdInfo.bin";
 
-    std::string m_outputFolder;
+	// set up metadata
+	auto metadata = new SPTAG::MemMetadataSet(index->m_iDataBlockSize, index->m_iDataCapacity, sizeof(uint64_t));
+	index->SetMetadata(metadata);
 
-    SPTAG::IndexAlgoType m_indexAlgoType;
+	// add the metadata
+	for (uint64_t label=1; label<=nvectors; label++) {
+		metadata->Add(SPTAG::ByteArray((uint8_t *)&label, sizeof(label), false));
+	}
 
-    std::string m_builderConfigFile;
+	// first build
+	printf("ready=%s\n", index->IsReady() ? "true" : "false");
+	printf("BuildIndex: count=%d dimension=%d\n", metadata->Count(), dimension);
+	CHECK(index->BuildIndex(vectors, metadata->Count(), dimension, false, true));
+	printf("ready=%s dim=%d\n", index->IsReady() ? "true" : "false", index->GetOptions()->m_dim);
+	printf("NumSamples=%d NumDeleted=%d\n", index->GetNumSamples(), index->GetNumDeleted());
 
-    std::string m_quantizerFile;
+	// appending if m_spann->IsReady()
+	//CHECK(index->AddIndex(vectors, metadata->Count(), dimension, std::shared_ptr<SPTAG::MemMetadataSet>(metadata)));
 
-    bool m_metaMapping = false;
-};
+	CHECK(index->SaveIndex(index->GetParameter("IndexDirectory", "Base")));
 
-int main(int argc, char* argv[])
-{
-    std::shared_ptr<BuilderOptions> options(new BuilderOptions);
-    if (!options->Parse(argc - 1, argv + 1))
-    {
-        exit(1);
-    }
-    SPTAGLIB_LOG(Helper::LogLevel::LL_Info, "Set QuantizerFile = %s\n", options->m_quantizerFile.c_str());
 
-    auto indexBuilder = VectorIndex::CreateInstance(options->m_indexAlgoType, options->m_inputValueType);
-    if (!options->m_quantizerFile.empty())
-    {
-        indexBuilder->LoadQuantizer(options->m_quantizerFile);
-        if (!indexBuilder->m_pQuantizer)
-        {
-            exit(1);
-        }
-    }
 
-    Helper::IniReader iniReader;
-    if (!options->m_builderConfigFile.empty() && iniReader.LoadIniFile(options->m_builderConfigFile) != ErrorCode::Success)
-    {
-        SPTAGLIB_LOG(Helper::LogLevel::LL_Error, "Cannot open index configure file!");
-        return -1;
-    }
+	// query the in-memory database
 
-    for (int i = 1; i < argc; i++)
-    {
-        std::string param(argv[i]);
-        size_t idx = param.find("=");
-        if (idx == std::string::npos) continue;
+	float query_vector[] = { 1.0, 2.0, 3.0, 4.0, 5.0 };
+	const int DefaultBatchSize = 128;
 
-        std::string paramName = param.substr(0, idx);
-        std::string paramVal = param.substr(idx + 1);
-        std::string sectionName;
-        idx = paramName.find(".");
-        if (idx != std::string::npos) {
-            sectionName = paramName.substr(0, idx);
-            paramName = paramName.substr(idx + 1);
-        }
-        iniReader.SetParameter(sectionName, paramName, paramVal);
-        SPTAGLIB_LOG(Helper::LogLevel::LL_Info, "Set [%s]%s = %s\n", sectionName.c_str(), paramName.c_str(), paramVal.c_str());
-    }
+	printf("QUERY!\n");
+	printf("ready=%s dim=%d\n", index->IsReady() ? "true" : "false", index->GetFeatureDim());
+	printf("NumSamples=%d NumDeleted=%d\n", index->GetNumSamples(), index->GetNumDeleted());
 
-    std::string sections[] = { "Base", "SelectHead", "BuildHead", "BuildSSDIndex", "Index" };
-    for (int i = 0; i < 5; i++) {
-        if (!iniReader.DoesParameterExist(sections[i], "NumberOfThreads")) {
-            iniReader.SetParameter(sections[i], "NumberOfThreads", std::to_string(options->m_threadNum));
-        }
-        for (const auto& iter : iniReader.GetParameters(sections[i]))
-        {
-            indexBuilder->SetParameter(iter.first.c_str(), iter.second.c_str(), sections[i]);
-        }
-    }
-    
-    ErrorCode code;
-    std::shared_ptr<VectorSet> vecset;
-    if (options->m_inputFiles != "") {
-        auto vectorReader = Helper::VectorSetReader::CreateInstance(options);
-        if (ErrorCode::Success != vectorReader->LoadFile(options->m_inputFiles))
-        {
-            SPTAGLIB_LOG(Helper::LogLevel::LL_Error, "Failed to read input file.\n");
-            exit(1);
-        }
-        vecset = vectorReader->GetVectorSet();
-        code = indexBuilder->BuildIndex(vecset, vectorReader->GetMetadataSet(), options->m_metaMapping, options->m_normalized, true);
-    }
-    else {
-        indexBuilder->SetQuantizerFileName(options->m_quantizerFile.substr(options->m_quantizerFile.find_last_of("/\\") + 1));
-        code = indexBuilder->BuildIndex(options->m_normalized);    
-    }
-    if (code == ErrorCode::Success)
-    {
-        indexBuilder->SaveIndex(options->m_outputFolder);
-    }
-    else
-    {
-        SPTAGLIB_LOG(Helper::LogLevel::LL_Error, "Failed to build index.\n");
-        exit(1);
-    }
-    return 0;
+	SPTAG::QueryResult result;
+	result.Init(query_vector, DefaultBatchSize, true, true);
+	CHECK(index->SearchIndex(result, false));
+	for (auto p=result.begin(); p!=result.end() && p->VID >= 0; ++p) {
+		float vec[dimension];
+		uint64_t label;
+		memcpy(&label, p->Meta.Data(), sizeof(label));
+		assert(sizeof(vec) == p->Sample.Length());
+		memcpy(vec, p->Sample.Data(), p->Sample.Length());
+		printf("VID=%-2d label=%-2lu dist=%-7.3f [", p->VID, label, sqrt(p->Dist));
+		for (int i=0; i<dimension; i++) {
+			printf(" %3.1f", vec[i]);
+		}
+		puts(" ]");
+	}
+
+	return 0;
 }
