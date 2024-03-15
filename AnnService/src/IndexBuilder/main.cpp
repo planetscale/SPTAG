@@ -62,7 +62,7 @@ int main(int argc, char **argv) {
 	options->m_indexDirectory = disk_path;
 	options->m_KVPath = disk_path + "/rocks";
 	options->m_deleteIDFile = disk_path + "/DeletedIDs.bin";
-	options->m_ssdInfoFile = disk_path + "/ssdInfo.bin";
+	options->m_ssdInfoFile = disk_path + "/SSDInfo.bin";
 
 	// set up metadata
 	auto metadata = new SPTAG::MemMetadataSet(index->m_iDataBlockSize, index->m_iDataCapacity, sizeof(uint64_t));
