@@ -13,6 +13,7 @@
 #include <assert.h>
 #include <math.h>
 #include <memory>
+#include <sys/time.h>
 
 // error codes: AnnService/inc/Core/DefinitionList.h
 #define CHECK(cmd) do { auto err = cmd; if (err != SPTAG::ErrorCode::Success) { printf("%s: err=%d\n", #cmd, (int)err); exit(1); } } while(0)
@@ -96,20 +97,31 @@ int main(int argc, char **argv) {
 	printf("ready=%s dim=%d\n", index->IsReady() ? "true" : "false", index->GetFeatureDim());
 	printf("NumSamples=%d NumDeleted=%d\n", index->GetNumSamples(), index->GetNumDeleted());
 
-	SPTAG::QueryResult result;
-	result.Init(query_vector, DefaultBatchSize, true, true);
-	CHECK(index->SearchIndex(result, false));
-	for (auto p=result.begin(); p!=result.end() && p->VID >= 0; ++p) {
-		float vec[dimension];
-		uint64_t label;
-		memcpy(&label, p->Meta.Data(), sizeof(label));
-		assert(sizeof(vec) == p->Sample.Length());
-		memcpy(vec, p->Sample.Data(), p->Sample.Length());
-		printf("VID=%-2d label=%-2lu dist=%-7.3f [", p->VID, label, sqrt(p->Dist));
-		for (int i=0; i<dimension; i++) {
-			printf(" %3.1f", vec[i]);
+	for (int repeat=0; repeat<100; repeat++) {
+		SPTAG::QueryResult result;
+		result.Init(query_vector, DefaultBatchSize, true, true);
+		CHECK(index->SearchIndex(result, false));
+		int count = 0;
+		for (auto p=result.begin(); p!=result.end() && p->VID >= 0; ++p) {
+			++count;
 		}
-		puts(" ]");
+		struct timeval tv;
+		gettimeofday(&tv, NULL);
+		printf("%ld.%06ld: %d results\n", tv.tv_sec, tv.tv_usec, count);
+#if 0
+		for (auto p=result.begin(); p!=result.end() && p->VID >= 0; ++p) {
+			float vec[dimension];
+			uint64_t label;
+			memcpy(&label, p->Meta.Data(), sizeof(label));
+			assert(sizeof(vec) == p->Sample.Length());
+			memcpy(vec, p->Sample.Data(), p->Sample.Length());
+			printf("VID=%-2d label=%-2lu dist=%-7.3f [", p->VID, label, sqrt(p->Dist));
+			for (int i=0; i<dimension; i++) {
+				printf(" %3.1f", vec[i]);
+			}
+			puts(" ]");
+		}
+#endif
 	}
 
 	return 0;
