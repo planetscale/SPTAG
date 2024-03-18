@@ -137,7 +137,7 @@ namespace SPTAG::SPANN {
             }
         };
 
-    private:
+    public:
         std::shared_ptr<Helper::KeyValueIO> db;
 
         COMMON::VersionLabel* m_versionMap;

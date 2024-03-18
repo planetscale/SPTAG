@@ -11,7 +11,7 @@ namespace SPTAG
         template <typename T>
         class Dataset
         {
-        private:
+        public:
             std::string name = "Data";
             SizeType rows = 0;
             DimensionType cols = 1;

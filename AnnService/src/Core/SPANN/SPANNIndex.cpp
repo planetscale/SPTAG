@@ -352,8 +352,20 @@ ErrorCode Index<T>::SearchIndex(QueryResult &p_query,
 
   m_index->SearchIndex(*p_queryResults);
 
+	int countResults = 0;
+	for (auto p=p_queryResults->begin(); p!=p_queryResults->end(); ++p) {
+		if (p->VID >= 0) countResults++;
+	}
+	printf("After initial search, %d results\n", countResults);
+
+	printf("m_extraSearcher=%p\n", m_extraSearcher.get());
   if (m_extraSearcher != nullptr) {
+		auto extra = dynamic_cast<SPTAG::SPANN::ExtraDynamicSearcher<float>*>(m_extraSearcher.get());
+		if (extra) {
+			printf("  m_postingSizes.m_data.rowsInBlockEx=%d\n", extra->m_postingSizes.m_data.rowsInBlockEx);
+		}
     auto workSpace = m_workSpaceFactory->GetWorkSpace();
+		printf("workSpace=%p\n", workSpace.get());
     if (!workSpace) {
       workSpace.reset(new ExtraWorkSpace());
       workSpace->Initialize(m_options.m_maxCheck, m_options.m_hashExp,
@@ -400,6 +412,12 @@ ErrorCode Index<T>::SearchIndex(QueryResult &p_query,
                                  nullptr);
     m_workSpaceFactory->ReturnWorkSpace(std::move(workSpace));
     p_queryResults->SortResult();
+
+		countResults = 0;
+		for (auto p=p_queryResults->begin(); p!=p_queryResults->end(); ++p) {
+			if (p->VID >= 0) countResults++;
+		}
+		printf("After extra search, %d results\n", countResults);
   }
 
   if (p_query.GetResultNum() < m_options.m_searchInternalResultNum) {

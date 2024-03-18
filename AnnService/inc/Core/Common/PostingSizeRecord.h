@@ -13,7 +13,7 @@ namespace SPTAG
     {
         class PostingSizeRecord
         {
-        private:
+        public:
             Dataset<int> m_data;
             
         public:

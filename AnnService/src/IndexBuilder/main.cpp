@@ -102,8 +102,8 @@ int main(int argc, char **argv) {
 		result.Init(query_vector, DefaultBatchSize, true, true);
 		CHECK(index->SearchIndex(result, false));
 		int count = 0;
-		for (auto p=result.begin(); p!=result.end() && p->VID >= 0; ++p) {
-			++count;
+		for (auto p=result.begin(); p!=result.end(); ++p) {
+			if (p->VID >= 0) ++count;
 		}
 		struct timeval tv;
 		gettimeofday(&tv, NULL);
