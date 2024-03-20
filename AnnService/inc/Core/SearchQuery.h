@@ -7,6 +7,10 @@
 #include "SearchResult.h"
 
 #include <cstring>
+#include <unistd.h>
+#include <sys/types.h>
+
+extern pid_t gettid(void);
 
 namespace SPTAG
 {
@@ -244,6 +248,27 @@ public:
     const_iterator end() const
     {
         return m_results.Data() + m_resultNum;
+    }
+
+    int Dump(const char *title, bool showMissing) const {
+        int count = 0;
+        for (auto p=this->begin(); p!=this->end(); ++p) {
+            if (p->VID >= 0) count++;
+        }
+        printf("[%d] %s: %d results\n", gettid(), title, count);
+        int find = (1<<20)-1;
+        for (auto p=this->begin(); p!=this->end() && p->VID >= 0; ++p) {
+            printf(" %d", p->VID);
+            find &= ~(1<<p->VID);
+        }
+        if (showMissing && find) {
+            printf("   missing:");
+            for (int i=0; i<20; i++) {
+                if (find & (1<<i)) printf(" %d", i);
+            }
+        }
+        puts("");
+        return count;
     }
 
 

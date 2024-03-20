@@ -28,6 +28,8 @@
 #include <random>
 #include <tbb/concurrent_hash_map.h>
 
+extern pid_t gettid(void);
+
 #ifdef ROCKSDB
 #include "ExtraRocksDBController.h"
 #endif
@@ -669,7 +671,9 @@ namespace SPTAG::SPANN {
                 }
                 std::unique_lock<std::shared_timed_mutex> lock(m_rwLocks[headID]);
 
+                printf("[%d] MergePostings: headID=%d reassign=%s\n", gettid(), headID, reassign?"T":"F");
                 if (!p_index->ContainSample(headID)) {
+                    printf("[%d] MergePostings: index does not contain sample %d\n", gettid(), headID);
                     m_mergeLock.unlock();
                     return ErrorCode::Success;
                 }
@@ -685,21 +689,27 @@ namespace SPTAG::SPANN {
 
                 auto* postingP = reinterpret_cast<uint8_t*>(&currentPostingList.front());
                 size_t postVectorNum = currentPostingList.size() / m_vectorInfoSize;
+                printf("[%d] MergePostings: postVectorNum = %zd / %d = %zd\n", gettid(), currentPostingList.size(), m_vectorInfoSize, postVectorNum);
                 int currentLength = 0;
                 uint8_t* vectorId = postingP;
                 for (int j = 0; j < postVectorNum; j++, vectorId += m_vectorInfoSize)
                 {
                     int VID = *((int*)(vectorId));
                     uint8_t version = *(vectorId + sizeof(int));
+                    printf("[%d] MergePostings: VID[%d] = %d, version = %d\n", gettid(), j, VID, version);
                     if (m_versionMap->Deleted(VID) || m_versionMap->GetVersion(VID) != version) continue;
                     vectorIdSet.insert(VID);
                     mergedPostingList += currentPostingList.substr(j * m_vectorInfoSize, m_vectorInfoSize);
                     currentLength++;
                 }
+                printf("[%d] MergePostings: currentLength=%d vectorIdSet.size()=%zd currentPostingList.size()=%zd mergedPostingList.size()=%zd\n",
+                  gettid(), currentLength, vectorIdSet.size(), currentPostingList.size(), mergedPostingList.size());
                 int totalLength = currentLength;
 
+                printf("[%d] currentLength=%d ; m_mergeThreshold=%d\n", gettid(), currentLength, m_mergeThreshold);
                 if (currentLength > m_mergeThreshold)
                 {
+                    printf("[%d] done merging, writing back\n", gettid());
                     m_postingSizes.UpdateSize(headID, currentLength);
                     if (db->Put(headID, mergedPostingList) != ErrorCode::Success) {
                         SPTAGLIB_LOG(Helper::LogLevel::LL_Info, "Merge Fail to write back postings\n");
@@ -712,6 +722,7 @@ namespace SPTAG::SPANN {
 
                 QueryResult queryResults(p_index->GetSample(headID), m_opt->m_internalResultNum, false);
                 p_index->SearchIndex(queryResults);
+                queryResults.Dump("MergePostings: subquery", false);
 
                 std::string nextPostingList;
 
@@ -719,6 +730,7 @@ namespace SPTAG::SPANN {
                 {
                     BasicResult* queryResult = queryResults.GetResult(i);
                     int nextLength = m_postingSizes.GetSize(queryResult->VID);
+                    printf("[%d] MergePostings: queryResult[%d]->VID=%d nextLength=%d\n", gettid(), i, queryResult->VID, nextLength);
                     tbb::concurrent_hash_map<SizeType, SizeType>::const_accessor headIDAccessor;
                     if (currentLength + nextLength < m_postingSizeLimit && !m_mergeList.find(headIDAccessor, queryResult->VID))
                     {

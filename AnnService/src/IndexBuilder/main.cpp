@@ -13,6 +13,7 @@
 #include <assert.h>
 #include <math.h>
 #include <memory>
+#include <unistd.h>
 #include <sys/time.h>
 
 // error codes: AnnService/inc/Core/DefinitionList.h
@@ -65,6 +66,9 @@ int main(int argc, char **argv) {
 	options->m_deleteIDFile = disk_path + "/DeletedIDs.bin";
 	options->m_ssdInfoFile = disk_path + "/SSDInfo.bin";
 
+	// set this to make everything work, since MergePostings is the source of all vector loss and corruption
+	//options->m_mergeThreshold = 1;
+
 	// set up metadata
 	auto metadata = new SPTAG::MemMetadataSet(index->m_iDataBlockSize, index->m_iDataCapacity, sizeof(uint64_t));
 	index->SetMetadata(metadata);
@@ -97,17 +101,11 @@ int main(int argc, char **argv) {
 	printf("ready=%s dim=%d\n", index->IsReady() ? "true" : "false", index->GetFeatureDim());
 	printf("NumSamples=%d NumDeleted=%d\n", index->GetNumSamples(), index->GetNumDeleted());
 
-	for (int repeat=0; repeat<100; repeat++) {
+	for (int repeat=1; repeat<=100; repeat++) {
 		SPTAG::QueryResult result;
 		result.Init(query_vector, DefaultBatchSize, true, true);
 		CHECK(index->SearchIndex(result, false));
-		int count = 0;
-		for (auto p=result.begin(); p!=result.end(); ++p) {
-			if (p->VID >= 0) ++count;
-		}
-		struct timeval tv;
-		gettimeofday(&tv, NULL);
-		printf("%ld.%06ld: %d results\n", tv.tv_sec, tv.tv_usec, count);
+		int count = result.Dump("IndexBuilder", true);
 #if 0
 		for (auto p=result.begin(); p!=result.end() && p->VID >= 0; ++p) {
 			float vec[dimension];
@@ -122,6 +120,11 @@ int main(int argc, char **argv) {
 			puts(" ]");
 		}
 #endif
+		if (count < 20) {
+			printf("Quitting after %d queries\n", repeat);
+			break;
+		}
+		usleep(200000);
 	}
 
 	return 0;

@@ -607,6 +607,7 @@ namespace SPTAG
             workSpace->Reset(m_iMaxCheck, p_query.GetResultNum());
 
             SearchIndex(*((COMMON::QueryResultSet<T>*)&p_query), *workSpace, p_searchDeleted, true);
+            p_query.Dump("In BKTIndex::SearchIndex", false);
 
             m_workSpaceFactory->ReturnWorkSpace(std::move(workSpace));
 

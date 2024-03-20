@@ -351,21 +351,16 @@ ErrorCode Index<T>::SearchIndex(QueryResult &p_query,
         (const T *)p_query.GetTarget(), m_options.m_searchInternalResultNum);
 
   m_index->SearchIndex(*p_queryResults);
+  p_queryResults->Dump("After initial search", false);
 
-	int countResults = 0;
-	for (auto p=p_queryResults->begin(); p!=p_queryResults->end(); ++p) {
-		if (p->VID >= 0) countResults++;
-	}
-	printf("After initial search, %d results\n", countResults);
-
-	printf("m_extraSearcher=%p\n", m_extraSearcher.get());
+  printf("m_extraSearcher=%p\n", m_extraSearcher.get());
   if (m_extraSearcher != nullptr) {
-		auto extra = dynamic_cast<SPTAG::SPANN::ExtraDynamicSearcher<float>*>(m_extraSearcher.get());
-		if (extra) {
-			printf("  m_postingSizes.m_data.rowsInBlockEx=%d\n", extra->m_postingSizes.m_data.rowsInBlockEx);
-		}
+    auto extra = dynamic_cast<SPTAG::SPANN::ExtraDynamicSearcher<float>*>(m_extraSearcher.get());
+    if (extra) {
+      printf("  m_postingSizes.m_data.rowsInBlockEx=%d\n", extra->m_postingSizes.m_data.rowsInBlockEx);
+    }
     auto workSpace = m_workSpaceFactory->GetWorkSpace();
-		printf("workSpace=%p\n", workSpace.get());
+    printf("workSpace=%p\n", workSpace.get());
     if (!workSpace) {
       workSpace.reset(new ExtraWorkSpace());
       workSpace->Initialize(m_options.m_maxCheck, m_options.m_hashExp,
@@ -412,12 +407,7 @@ ErrorCode Index<T>::SearchIndex(QueryResult &p_query,
                                  nullptr);
     m_workSpaceFactory->ReturnWorkSpace(std::move(workSpace));
     p_queryResults->SortResult();
-
-		countResults = 0;
-		for (auto p=p_queryResults->begin(); p!=p_queryResults->end(); ++p) {
-			if (p->VID >= 0) countResults++;
-		}
-		printf("After extra search, %d results\n", countResults);
+    p_queryResults->Dump("After extra search", true);
   }
 
   if (p_query.GetResultNum() < m_options.m_searchInternalResultNum) {
@@ -1027,6 +1017,10 @@ random_head_selection:
                "Seleted Nodes: %u, about %.2lf%% of total.\n",
                static_cast<unsigned int>(selected.size()),
                selected.size() * 100.0 / data.R());
+  for (int i = 0; i < selected.size(); i++) {
+    printf(" %d", selected[i]);
+  }
+  puts("");
 
   if (!m_options.m_noOutput) {
     std::sort(selected.begin(), selected.end());

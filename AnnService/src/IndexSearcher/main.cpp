@@ -47,11 +47,7 @@ int main(int argc, const char **argv) {
 	SPTAG::QueryResult result;
 	result.Init(query_vector, DefaultBatchSize, true, true);
 	CHECK(index->SearchIndex(result, false));
-	int count = 0;
-	for (auto p=result.begin(); p!=result.end() && p->VID >= 0; ++p) {
-		++count;
-	}
-	printf("%d results:\n", count);
+	int count = result.Dump("IndexSearcher", true);
 	for (auto p=result.begin(); p!=result.end() && p->VID >= 0; ++p) {
 		float vec[dimension];
 		uint64_t label;
@@ -64,6 +60,9 @@ int main(int argc, const char **argv) {
 		}
 		puts(" ]");
 	}
+
+	sleep(1);  // let the merge finish
+	printf("Exiting.  Got %d results\n", count);
 
 	return 0;
 }
